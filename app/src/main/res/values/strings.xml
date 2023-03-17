@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MinesweeperAndroid</string>
+    <string name="app_name">Minesweeper</string>
     <string name="easy">Easy</string>
     <string name="normal">Normal</string>
     <string name="hard">Hard</string>
