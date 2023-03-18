@@ -22,7 +22,7 @@ class GameData {
         this.gameType = gameType
     }
 
-    constructor(id: Int?, time: Int, difficulty: Difficulty) : this(id, time, difficulty.ordinal)
+    constructor(id: Int?, time: Int, difficulty: Difficulty) : this(id, time, difficulty.id)
 
     override fun toString(): String {
         return "GameData(_id=$_id, time=$time, gameType=$gameType)"

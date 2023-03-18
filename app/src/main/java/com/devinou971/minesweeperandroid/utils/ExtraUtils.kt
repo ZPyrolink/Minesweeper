@@ -33,4 +33,6 @@ fun Intent.putExtra(extraUtils: ExtraUtils, value: Int) = putExtra(extraUtils.na
 fun Intent.putExtra(extraUtils: ExtraUtils, value: Serializable) = putExtra(extraUtils.name, value);
 fun Intent.getIntExtra(extraUtils: ExtraUtils, default: Int) =
     getIntExtra(extraUtils.name, default);
-fun Intent.getSerializableExtra(extraUtils: ExtraUtils) = getSerializableExtra(extraUtils.name)
+
+fun <T : Serializable> Intent.getExtra(extraUtils: ExtraUtils, default: T) =
+    if (hasExtra(extraUtils.name)) (getSerializableExtra(extraUtils.name) ?: default) as T else default

@@ -41,9 +41,9 @@ class MenuActivity : AppCompatActivity() {
         Thread {
             openDatabase()
 
-            for (difficulty in Difficulty.values()) {
+            for (difficulty in highscoreTexts.keys) {
                 val bestScore =
-                    gameDataDAO?.getBestTimeForDifficulty(difficulty.ordinal) ?: continue
+                    gameDataDAO?.getBestTimeForDifficulty(difficulty.id) ?: continue
 
                 val minutes = TimeUnit.SECONDS.toMinutes(bestScore.time.toLong()).toInt()
                 val seconds = bestScore.time % TimeUnit.MINUTES.toSeconds(1)
@@ -67,13 +67,12 @@ class MenuActivity : AppCompatActivity() {
         val cellSize = availableWidth / nbCols
         val nbRows = availableHeight / cellSize
         when (viewId) {
-            R.id.customLevelButon -> {
-                val intent = Intent(this, CustomGameActivity::class.java).apply {
+            R.id.customLevelButon ->
+                startActivity(Intent(this, CustomGameActivity::class.java).apply {
                     putExtra(ExtraUtils.NB_COLS, nbCols)
                     putExtra(ExtraUtils.NB_ROWS, nbRows)
-                }
-                startActivity(intent)
-            }
+                })
+
             R.id.easyLevelButton, R.id.normalLevelButton, R.id.hardLevelButton -> {
                 val difficulty = when (viewId) {
                     R.id.easyLevelButton -> Difficulty.EASY

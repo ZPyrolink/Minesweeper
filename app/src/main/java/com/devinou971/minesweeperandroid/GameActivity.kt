@@ -117,7 +117,7 @@ class GameActivity : AppCompatActivity() {
         nbRows = intent.getIntExtra(ExtraUtils.NB_ROWS, 10)
         nbCols = intent.getIntExtra(ExtraUtils.NB_COLS, 10)
         cellSize = intent.getIntExtra(ExtraUtils.CELL_SIZE, 100)
-        gameMode = intent.getSerializableExtra(ExtraUtils.DIFFICULTY) as Difficulty
+        gameMode = intent.getExtra(ExtraUtils.DIFFICULTY, Difficulty.CUSTOM)
 
         bombIcon = BitmapFactory.decodeResource(resources, R.drawable.bombicon)
             .scale(cellSize, cellSize, false)
