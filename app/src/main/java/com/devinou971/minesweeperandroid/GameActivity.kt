@@ -9,8 +9,7 @@ import android.graphics.*
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.SurfaceView
-import android.view.View.GONE
-import android.view.View.VISIBLE
+import android.view.View
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
@@ -19,54 +18,32 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.scale
 import com.devinou971.minesweeperandroid.classes.MinesweeperBoard
+import com.devinou971.minesweeperandroid.extensions.Paint
+import com.devinou971.minesweeperandroid.extensions.setGone
+import com.devinou971.minesweeperandroid.extensions.setVisible
 import com.devinou971.minesweeperandroid.services.TimerService
 import com.devinou971.minesweeperandroid.storageclasses.AppDatabase
 import com.devinou971.minesweeperandroid.storageclasses.GameData
-import com.devinou971.minesweeperandroid.storageclasses.GameDataDAO
 import com.devinou971.minesweeperandroid.utils.*
 
-
 class GameActivity : AppCompatActivity() {
-
-    private var appDatabase: AppDatabase? = null
-    private var gameDataDAO: GameDataDAO? = null
-
     private lateinit var bombIcon: Bitmap
     private lateinit var flagIcon: Bitmap
     private lateinit var tileIcon: Bitmap
 
     private lateinit var gameMode: Difficulty
 
-    private val paints: MutableList<Paint> = mutableListOf(Paint(0).apply {
-        color = Color.BLUE
-        textSize = 50f
-    }, Paint(0).apply {
-        color = Color.GREEN
-        textSize = 50f
-    }, Paint(0).apply {
-        color = Color.RED
-        textSize = 50f
-    }, Paint(0).apply {
-        color = Color.rgb(0, 0, 127)
-        textSize = 50f
-    }, Paint(0).apply {
-        color = Color.rgb(127, 0, 0)
-        textSize = 50f
-    }, Paint(0).apply {
-        color = Color.rgb(255, 192, 203)
-        textSize = 50f
-    }, Paint(0).apply {
-        color = Color.MAGENTA
-        textSize = 50f
-    }, Paint(0).apply {
-        color = Color.CYAN
-        textSize = 50f
-    }, Paint(0).apply {
-        color = Color.YELLOW
-        textSize = 50f
-    })
-
-    // --------------------------
+    private val paints = arrayOf(
+        Paint(Color.BLUE, 50f),
+        Paint(Color.GREEN, 50f),
+        Paint(Color.RED, 50f),
+        Paint(Color.rgb(0, 0, 127), 50f),
+        Paint(Color.rgb(127, 0, 0), 50f),
+        Paint(Color.rgb(255, 192, 203), 50f),
+        Paint(Color.MAGENTA, 50f),
+        Paint(Color.CYAN, 50f),
+        Paint(Color.YELLOW, 50f)
+    )
 
     private lateinit var gameBoard: MinesweeperBoard
     private lateinit var gameView: SurfaceView
@@ -83,8 +60,14 @@ class GameActivity : AppCompatActivity() {
     private var quit = false
 
     // --------- DO WE WANT TO FLAG A SLOT OR REVEAL A SLOT ? ---------
-    enum class Mode {
-        REVEAL, FLAG
+    enum class Mode(val icon: Int) {
+        REVEAL(R.drawable.pickaxeicon),
+        FLAG(R.drawable.flagicon);
+
+        fun next() = when (this) {
+            REVEAL -> FLAG
+            FLAG -> REVEAL
+        }
     }
 
     private var mode: Mode = Mode.REVEAL
@@ -93,78 +76,80 @@ class GameActivity : AppCompatActivity() {
     private lateinit var serviceIntent: Intent
     private var time: Double = 0.0
 
+    /**
+     * FETCHING ALL THE VIEWS
+     */
+    private fun bindViews()
+    {
+        gameView = findViewById(R.id.gameView)
+        playerWin = findViewById(R.id.playerWin)
+        playerLose = findViewById(R.id.playerLose)
+        labelNbFlagsRemaining = findViewById(R.id.nbFlagsRemaining)
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
 
         Thread {
-            accessDatabase()
-            val cursor = this.gameDataDAO?.getAllGameData()
-
-            if (cursor != null) {
-                while (cursor.moveToNext()) {
-                    val index = cursor.getColumnIndexOrThrow("game_type")
-                    val lastName = cursor.getString(index)
+            AppDatabase.getAppDataBase(this).gameDataDAO().getAllGameData().apply {
+                while (moveToNext()) {
+                    val index = getColumnIndexOrThrow("game_type")
+                    val lastName = getString(index)
                     println(lastName)
-                    println(cursor.columnNames)
+                    println(columnNames)
                 }
             }
         }.start()
 
         // --------- GETTING THE DIFFERENT VALUES SENT FROM OTHER ACTIVITIES ---------
-        nbBombs = intent.getIntExtra(ExtraUtils.NB_BOMBS, 10)
-        nbRows = intent.getIntExtra(ExtraUtils.NB_ROWS, 10)
-        nbCols = intent.getIntExtra(ExtraUtils.NB_COLS, 10)
-        cellSize = intent.getIntExtra(ExtraUtils.CELL_SIZE, 100)
-        gameMode = intent.getExtra(ExtraUtils.DIFFICULTY, Difficulty.CUSTOM)
+        intent.apply {
+            nbBombs = getIntExtra(ExtraUtils.NB_BOMBS, 10)
+            nbRows = getIntExtra(ExtraUtils.NB_ROWS, 10)
+            nbCols = getIntExtra(ExtraUtils.NB_COLS, 10)
+            cellSize = getIntExtra(ExtraUtils.CELL_SIZE, 100)
+            gameMode = getExtra(ExtraUtils.DIFFICULTY, Difficulty.CUSTOM)
+        }
 
-        bombIcon = BitmapFactory.decodeResource(resources, R.drawable.bombicon)
-            .scale(cellSize, cellSize, false)
-        flagIcon = BitmapFactory.decodeResource(resources, R.drawable.flagicon)
-            .scale(cellSize, cellSize, false)
-        tileIcon = BitmapFactory.decodeResource(resources, R.drawable.emptytile)
-            .scale(cellSize, cellSize, false)
+        fun getIcon(resource: Int) =
+            BitmapFactory.decodeResource(resources, resource).scale(cellSize, cellSize, false)
 
-        // --------- FETCHING ALL THE VIEWS ---------
-        gameView = findViewById(R.id.gameView)
-        playerWin = findViewById(R.id.playerWin)
-        playerLose = findViewById(R.id.playerLose)
-        labelNbFlagsRemaining = findViewById(R.id.nbFlagsRemaining)
+        bombIcon = getIcon(R.drawable.bombicon)
+        flagIcon = getIcon(R.drawable.flagicon)
+        tileIcon = getIcon(R.drawable.emptytile)
+
+        bindViews()
 
         gameBoard = MinesweeperBoard(nbRows, nbCols, nbBombs)
-        val modeSwitchButton = findViewById<ImageView>(R.id.switchmode)
 
         // --------- CREATE ON CLICK EVENT FOR CANVAS ---------
-        gameView.setOnTouchListener { _, motionEvent: MotionEvent ->
-            if (motionEvent.action == MotionEvent.ACTION_UP) {
+        gameView.setOnTouchListener { _, motionEvent ->
+            if (motionEvent.action == MotionEvent.ACTION_UP)
                 gridClickedEvent(motionEvent.x, motionEvent.y)
-            }
+
             return@setOnTouchListener true
         }
+
         gameView.setZOrderOnTop(true)
         gameView.holder.setFormat(PixelFormat.TRANSPARENT)
 
         // --------- ONCLICK EVENT FOR THE "REPLAY" BUTTON
-        findViewById<ImageView>(R.id.reloadBoard).setOnClickListener { replay() }
-        findViewById<Button>(R.id.replayButton).setOnClickListener { replay() }
-        findViewById<Button>(R.id.replayButton2).setOnClickListener { replay() }
+        for (id in arrayOf(R.id.reloadBoard, R.id.replayButton, R.id.replayButton2))
+            findViewById<View>(id).setOnClickListener { replay() }
 
-        findViewById<Button>(R.id.returnMenuButton).setOnClickListener { goToMenu() }
-        findViewById<Button>(R.id.returnMenuButton2).setOnClickListener { goToMenu() }
+        for (id in arrayOf(R.id.returnMenuButton, R.id.returnMenuButton2))
+            findViewById<Button>(id).setOnClickListener { goToMenu() }
 
         // --------- ONCLICK EVENT TO SWITCH BETWEEN FLAG AND REVEAL MODE ---------
-        modeSwitchButton.setBackgroundResource(R.drawable.pickaxeicon)
-
-        modeSwitchButton.setOnClickListener {
-            if (mode == Mode.REVEAL) {
-                mode = Mode.FLAG
-                modeSwitchButton.setBackgroundResource(R.drawable.flagicon)
-            } else {
-                mode = Mode.REVEAL
-                modeSwitchButton.setBackgroundResource(R.drawable.pickaxeicon)
+        findViewById<ImageView>(R.id.switchmode).apply {
+            setBackgroundResource(R.drawable.pickaxeicon)
+            setOnClickListener {
+                mode = mode.next()
+                setBackgroundResource(mode.icon)
             }
         }
+
         labelNbFlagsRemaining.text = gameBoard.nbFlags.toString()
         findViewById<Button>(R.id.anotherChance).setOnClickListener { revive() }
 
@@ -179,46 +164,45 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun gridClickedEvent(x: Float, y: Float) {
-        if (mode == Mode.REVEAL) {
-            if (gameBoard.isFirstTouch) {
-                startTimer()
+        when (mode) {
+            Mode.REVEAL -> {
+                if (gameBoard.isFirstTouch)
+                    startTimer()
+
+                reveal(x, y)
+                if (gameBoard.won()) {
+                    Toast.makeText(this, "You win GG!", Toast.LENGTH_LONG).show()
+                    gameView.setGone()
+                    playerWin.setVisible()
+
+                    stopTimer()
+
+                    Thread {
+                        AppDatabase.getAppDataBase(this).gameDataDAO()
+                            .insertGameData(GameData(null, this.time.toInt(), this.gameMode))
+                    }.start()
+                } else if (gameBoard.gameOver) {
+                    Toast.makeText(this, "Game Over", Toast.LENGTH_LONG).show()
+                    gameView.setGone()
+                    playerLose.setVisible()
+
+                    stopTimer()
+                }
             }
 
-            reveal(x, y)
-            if (gameBoard.won()) {
-                Toast.makeText(this, "You win GG!", Toast.LENGTH_LONG).show()
-                gameView.visibility = GONE
-                playerWin.visibility = VISIBLE
-
-                stopTimer()
-
-                Thread {
-                    accessDatabase()
-                    val gameData = GameData(null, this.time.toInt(), this.gameMode)
-                    if (this.gameDataDAO != null)
-                        this.gameDataDAO?.insertGameData(gameData)
-
-
-                }.start()
-            } else if (gameBoard.gameOver) {
-                Toast.makeText(this, "Game Over", Toast.LENGTH_LONG).show()
-                gameView.visibility = GONE
-                playerLose.visibility = VISIBLE
-
-                stopTimer()
+            Mode.FLAG -> {
+                flag(x, y)
+                labelNbFlagsRemaining.text = gameBoard.nbFlags.toString()
             }
-        } else if (mode == Mode.FLAG) {
-            flag(x, y)
-            labelNbFlagsRemaining.text = gameBoard.nbFlags.toString()
         }
     }
 
     private fun replay() {
         resetTimer()
         gameBoard = MinesweeperBoard(nbRows, nbCols, nbBombs)
-        playerWin.visibility = GONE
-        playerLose.visibility = GONE
-        gameView.visibility = VISIBLE
+        playerWin.setGone()
+        playerLose.setGone()
+        gameView.setVisible()
 
         labelNbFlagsRemaining.text = gameBoard.nbFlags.toString()
         drawGrid()
@@ -228,9 +212,9 @@ class GameActivity : AppCompatActivity() {
         gameBoard.gameOver = false
         gameBoard.revive()
 
-        playerWin.visibility = GONE
-        playerLose.visibility = GONE
-        gameView.visibility = VISIBLE
+        playerWin.setGone()
+        playerLose.setVisible()
+        gameView.setVisible()
 
         labelNbFlagsRemaining.text = gameBoard.nbFlags.toString()
         drawGrid()
@@ -239,16 +223,7 @@ class GameActivity : AppCompatActivity() {
 
     private fun goToMenu() {
         quit = true
-        /*if(!gameBoard.gameOver){
-            when(gameMode){
-                0 -> runBlocking { addNewEasyScore(time.toInt()) }
-                1 -> runBlocking { addNewNormalScore(time.toInt()) }
-                2 -> runBlocking { addNewHardScore(time.toInt()) }
-                else -> runBlocking { addNewEasyScore(time.toInt()) }
-            }
-        }*/
-        val intent = Intent(this, MenuActivity::class.java)
-        startActivity(intent)
+        startActivity(Intent(this, MenuActivity::class.java))
     }
 
     private fun reveal(x: Float, y: Float) {
@@ -270,46 +245,37 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun drawGrid() {
-        val can = gameView.holder.lockCanvas()
-        can.drawColor(this.applicationContext.getColor(R.color.bgColor), PorterDuff.Mode.CLEAR)
-        val textXOffset = cellSize / 3
-        val textYOffset = cellSize * 2 / 3
+        val canvas = gameView.holder.lockCanvas()
+        canvas.drawColor(this.applicationContext.getColor(R.color.bgColor), PorterDuff.Mode.CLEAR)
+        val textOffset = Point(cellSize / 3, cellSize * 2 / 3)
+
+        fun drawBitmap(icon: Bitmap, x: Int, y: Int) =
+            canvas.drawBitmap(icon, x * cellSize.toFloat(), y * cellSize.toFloat(), Paint(0))
+
         for (y in 0 until gameBoard.grid.size) {
             for (x in 0 until gameBoard.grid[0].size) {
                 when (val res = gameBoard.grid[y][x].toString()) {
-                    "B" -> can.drawBitmap(
-                        bombIcon,
-                        x * cellSize.toFloat(),
-                        y * cellSize.toFloat(),
-                        Paint(0)
+                    "B", "F", "#" -> drawBitmap(
+                        when (res) {
+                            "B" -> bombIcon
+                            "F" -> flagIcon
+                            "#" -> tileIcon
+                            else -> throw IllegalArgumentException()
+                        }, x, y
                     )
-                    "F" -> can.drawBitmap(
-                        flagIcon,
-                        x * cellSize.toFloat(),
-                        y * cellSize.toFloat(),
-                        Paint(0)
-                    )
-                    "#" -> can.drawBitmap(
-                        tileIcon,
-                        x * cellSize.toFloat(),
-                        y * cellSize.toFloat(),
-                        Paint(0)
-                    )
-                    "0" -> {
-                        // We don't display when there are no bombs
-                    }
+                    "0" -> {} // We don't display when there are no bombs
                     else -> {
-                        can.drawText(
+                        canvas.drawText(
                             res,
-                            x * cellSize + textXOffset.toFloat(),
-                            y * cellSize + textYOffset.toFloat(),
+                            x * cellSize + textOffset.x.toFloat(),
+                            y * cellSize + textOffset.y.toFloat(),
                             paints[res.toInt() - 1]
                         )
                     }
                 }
             }
         }
-        gameView.holder.unlockCanvasAndPost(can)
+        gameView.holder.unlockCanvasAndPost(canvas)
     }
 
 
@@ -345,10 +311,5 @@ class GameActivity : AppCompatActivity() {
     override fun onDestroy() {
         stopTimer()
         super.onDestroy()
-    }
-
-    private fun accessDatabase() {
-        appDatabase = AppDatabase.getAppDataBase(this)
-        gameDataDAO = appDatabase?.gameDataDAO()
     }
 }
