@@ -12,6 +12,7 @@ import com.devinou971.minesweeperandroid.utils.Difficulty
 import com.devinou971.minesweeperandroid.utils.ExtraUtils
 import com.devinou971.minesweeperandroid.utils.putExtra
 import com.devinou971.minesweeperandroid.utils.putExtras
+import java.util.concurrent.TimeUnit
 
 class MenuActivity : AppCompatActivity() {
 
@@ -28,36 +29,36 @@ class MenuActivity : AppCompatActivity() {
         ))
             findViewById<Button>(buttonId).setOnClickListener { startGame(buttonId) }
 
-        findViewById<ImageButton>(R.id.parameterButton).setOnClickListener { goToParameter() }
+        findViewById<ImageButton>(R.id.parameterButton).setOnClickListener { openSettings() }
 
 
-        val highscoreViews = mutableListOf<TextView>()
-        highscoreViews.add(findViewById(R.id.bestScoreEasy))
-        highscoreViews.add(findViewById(R.id.bestScoreNormal))
-        highscoreViews.add(findViewById(R.id.bestScoreHard))
+        val highscoreTexts = mapOf<Difficulty, TextView>(
+            Pair(Difficulty.EASY, findViewById(R.id.bestScoreEasy)),
+            Pair(Difficulty.NORMAL, findViewById(R.id.bestScoreNormal)),
+            Pair(Difficulty.HARD, findViewById(R.id.bestScoreHard)),
+        )
 
         Thread {
-            accessDatabase()
-            for (i in 0..highscoreViews.size) {
-                val bestScore = gameDataDAO?.getBestTimeForDifficulty(i)
-                if (bestScore != null) {
-                    val minutes = bestScore.time / 60
-                    val seconds = bestScore.time - minutes * 60
+            openDatabase()
 
-                    runOnUiThread {
-                        highscoreViews[i].text =
-                            resources.getString(R.string.highscore, minutes, seconds)
-                    }
+            for (difficulty in Difficulty.values()) {
+                val bestScore =
+                    gameDataDAO?.getBestTimeForDifficulty(difficulty.ordinal) ?: continue
+
+                val minutes = TimeUnit.SECONDS.toMinutes(bestScore.time.toLong()).toInt()
+                val seconds = bestScore.time % TimeUnit.MINUTES.toSeconds(1)
+
+                runOnUiThread {
+                    highscoreTexts[difficulty]!!.text =
+                        resources.getString(R.string.highscore, minutes, seconds)
                 }
             }
 
         }.start()
     }
 
-    private fun goToParameter() {
-        val intent = Intent(this, ParametersActivity::class.java).apply { }
-        startActivity(intent)
-    }
+    private fun openSettings() =
+        startActivity(Intent(this, ParametersActivity::class.java))
 
     private fun startGame(viewId: Int) {
         val availableHeight = (window.decorView.height * 0.80).toInt()
@@ -73,7 +74,7 @@ class MenuActivity : AppCompatActivity() {
                 }
                 startActivity(intent)
             }
-            else -> {
+            R.id.easyLevelButton, R.id.normalLevelButton, R.id.hardLevelButton -> {
                 val difficulty = when (viewId) {
                     R.id.easyLevelButton -> Difficulty.EASY
                     R.id.normalLevelButton -> Difficulty.NORMAL
@@ -83,9 +84,9 @@ class MenuActivity : AppCompatActivity() {
 
                 startActivity(Intent(this, GameActivity::class.java).apply {
                     putExtras(
-                        difficulty.nbBombs(nbRows, nbCols),
-                        nbCols,
                         nbRows,
+                        nbCols,
+                        difficulty.nbBombs(nbRows, nbCols),
                         cellSize,
                         difficulty
                     )
@@ -94,7 +95,7 @@ class MenuActivity : AppCompatActivity() {
         }
     }
 
-    private fun accessDatabase() {
+    private fun openDatabase() {
         appDatabase = AppDatabase.getAppDataBase(this)
         gameDataDAO = appDatabase?.gameDataDAO()
     }

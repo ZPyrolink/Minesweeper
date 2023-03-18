@@ -6,17 +6,23 @@ import androidx.room.PrimaryKey
 import com.devinou971.minesweeperandroid.utils.Difficulty
 
 @Entity
-class GameData(
-    @PrimaryKey(autoGenerate = true) var _id: Int?,
-    @ColumnInfo(name = "time") var time: Int,
-    difficulty: Difficulty
-) {
-    @ColumnInfo(name = "game_type")
-    val gameType: Int
+class GameData {
+    @PrimaryKey(autoGenerate = true)
+    var _id: Int?
 
-    init {
-        gameType = difficulty.ordinal
+    @ColumnInfo(name = "time")
+    var time: Int
+
+    @ColumnInfo(name = "game_type")
+    var gameType: Int
+
+    constructor(id: Int?, time: Int, gameType: Int) {
+        _id = id
+        this.time = time;
+        this.gameType = gameType
     }
+
+    constructor(id: Int?, time: Int, difficulty: Difficulty) : this(id, time, difficulty.ordinal)
 
     override fun toString(): String {
         return "GameData(_id=$_id, time=$time, gameType=$gameType)"
