@@ -7,7 +7,6 @@ import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.devinou971.minesweeperandroid.storageclasses.AppDatabase
-import com.devinou971.minesweeperandroid.storageclasses.GameDataDAO
 import com.devinou971.minesweeperandroid.utils.Difficulty
 import com.devinou971.minesweeperandroid.utils.ExtraUtils
 import com.devinou971.minesweeperandroid.utils.putExtra
@@ -15,10 +14,6 @@ import com.devinou971.minesweeperandroid.utils.putExtras
 import java.util.concurrent.TimeUnit
 
 class MenuActivity : AppCompatActivity() {
-
-    private var appDatabase: AppDatabase? = null
-    private var gameDataDAO: GameDataDAO? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_menu)
@@ -31,7 +26,6 @@ class MenuActivity : AppCompatActivity() {
 
         findViewById<ImageButton>(R.id.parameterButton).setOnClickListener { openSettings() }
 
-
         val highscoreTexts = mapOf<Difficulty, TextView>(
             Pair(Difficulty.EASY, findViewById(R.id.bestScoreEasy)),
             Pair(Difficulty.NORMAL, findViewById(R.id.bestScoreNormal)),
@@ -39,11 +33,9 @@ class MenuActivity : AppCompatActivity() {
         )
 
         Thread {
-            openDatabase()
-
             for (difficulty in highscoreTexts.keys) {
-                val bestScore =
-                    gameDataDAO?.getBestTimeForDifficulty(difficulty.id) ?: continue
+                val bestScore = AppDatabase.getAppDataBase(this).gameDataDAO()
+                    .getBestTimeForDifficulty(difficulty.id) ?: continue
 
                 val minutes = TimeUnit.SECONDS.toMinutes(bestScore.time.toLong()).toInt()
                 val seconds = bestScore.time % TimeUnit.MINUTES.toSeconds(1)
@@ -53,7 +45,6 @@ class MenuActivity : AppCompatActivity() {
                         resources.getString(R.string.highscore, minutes, seconds)
                 }
             }
-
         }.start()
     }
 
@@ -66,22 +57,22 @@ class MenuActivity : AppCompatActivity() {
         val nbCols = 10
         val cellSize = availableWidth / nbCols
         val nbRows = availableHeight / cellSize
-        when (viewId) {
-            R.id.customLevelButon ->
-                startActivity(Intent(this, CustomGameActivity::class.java).apply {
-                    putExtra(ExtraUtils.NB_COLS, nbCols)
-                    putExtra(ExtraUtils.NB_ROWS, nbRows)
-                })
+
+        startActivity(when (viewId) {
+            R.id.customLevelButon -> Intent(this, CustomGameActivity::class.java).apply {
+                putExtra(ExtraUtils.NB_COLS, nbCols)
+                putExtra(ExtraUtils.NB_ROWS, nbRows)
+            }
 
             R.id.easyLevelButton, R.id.normalLevelButton, R.id.hardLevelButton -> {
                 val difficulty = when (viewId) {
                     R.id.easyLevelButton -> Difficulty.EASY
                     R.id.normalLevelButton -> Difficulty.NORMAL
                     R.id.hardLevelButton -> Difficulty.HARD
-                    else -> throw Exception()
+                    else -> throw IllegalArgumentException()
                 }
 
-                startActivity(Intent(this, GameActivity::class.java).apply {
+                Intent(this, GameActivity::class.java).apply {
                     putExtras(
                         nbRows,
                         nbCols,
@@ -89,13 +80,10 @@ class MenuActivity : AppCompatActivity() {
                         cellSize,
                         difficulty
                     )
-                })
+                }
             }
-        }
-    }
 
-    private fun openDatabase() {
-        appDatabase = AppDatabase.getAppDataBase(this)
-        gameDataDAO = appDatabase?.gameDataDAO()
+            else -> throw IllegalArgumentException()
+        })
     }
 }

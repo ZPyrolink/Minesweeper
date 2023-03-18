@@ -12,11 +12,6 @@ interface GameDataDAO {
     @Insert
     fun insertGameData(gameData: GameData)
 
-    /*
-    @Update
-    fun updateGameData(gameData: GameData)
-    */
-
     @Delete
     fun deleteGameData(gameData: GameData)
 
@@ -27,5 +22,5 @@ interface GameDataDAO {
     fun getOneGameData(id: Int) : GameData
 
     @Query("SELECT * FROM GameData WHERE game_type=:difficulty ORDER BY time ASC LIMIT 1")
-    fun getBestTimeForDifficulty(difficulty: Int) : GameData
+    fun getBestTimeForDifficulty(difficulty: Int) : GameData?
 }
