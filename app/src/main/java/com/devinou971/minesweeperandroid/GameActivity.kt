@@ -7,7 +7,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.*
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.view.MotionEvent
 import android.view.SurfaceView
 import android.view.View
@@ -25,7 +24,6 @@ import com.devinou971.minesweeperandroid.services.TimerService
 import com.devinou971.minesweeperandroid.storageclasses.AppDatabase
 import com.devinou971.minesweeperandroid.storageclasses.GameData
 import com.devinou971.minesweeperandroid.utils.*
-import java.sql.Time
 import java.util.*
 import java.util.concurrent.TimeUnit
 
@@ -94,10 +92,10 @@ class GameActivity : AppCompatActivity() {
      * GETTING THE DIFFERENT VALUES SENT FROM OTHER ACTIVITIES
      */
     private fun getExtras(intent: Intent) = intent.apply {
-        nbBombs = getIntExtra(ExtraUtils.NB_BOMBS, 10)
-        nbRows = getIntExtra(ExtraUtils.NB_ROWS, 10)
-        nbCols = getIntExtra(ExtraUtils.NB_COLS, 10)
-        cellSize = getIntExtra(ExtraUtils.CELL_SIZE, 100)
+        nbBombs = getExtra(ExtraUtils.NB_BOMBS, 10)
+        nbRows = getExtra(ExtraUtils.NB_ROWS, 10)
+        nbCols = getExtra(ExtraUtils.NB_COLS, 10)
+        cellSize = getExtra(ExtraUtils.CELL_SIZE, 100)
         gameMode = getExtra(ExtraUtils.DIFFICULTY, Difficulty.CUSTOM)
     }
 
@@ -157,7 +155,7 @@ class GameActivity : AppCompatActivity() {
         gameView.viewTreeObserver.addOnWindowFocusChangeListener { if (!quit) drawGrid() }
 
         serviceIntent = Intent(applicationContext, TimerService::class.java)
-        registerReceiver(updateTime, IntentFilter(TimerService.TIMER_UPDATED))
+        registerReceiver(updateTime, IntentFilter(ExtraUtils.TIMER_UPDATED.name))
     }
 
     private fun gridClickedEvent(position: PointF) {
@@ -283,7 +281,7 @@ class GameActivity : AppCompatActivity() {
 
     private val updateTime: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
-            time = intent.getDoubleExtra(TimerService.TIME_EXTRA, 0.0)
+            time = intent.getExtra(ExtraUtils.TIME_EXTRA, .0)
             val seconds = time.toInt() % TimeUnit.MINUTES.toSeconds(1)
             val minutes = TimeUnit.SECONDS.toMinutes(time.toLong()).toInt()
             findViewById<TextView>(R.id.gameTimerView).text = resources.getString(
@@ -295,7 +293,7 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun startTimer() {
-        serviceIntent.putExtra(TimerService.TIME_EXTRA, time)
+        serviceIntent.putExtra(ExtraUtils.TIME_EXTRA, time)
         startService(serviceIntent)
     }
 

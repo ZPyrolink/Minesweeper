@@ -8,7 +8,10 @@ enum class ExtraUtils {
     NB_COLS,
     NB_BOMBS,
     CELL_SIZE,
-    DIFFICULTY;
+    DIFFICULTY,
+
+    TIMER_UPDATED,
+    TIME_EXTRA;
 }
 
 fun Intent.putExtras(rows: Int, cols: Int, bombs: Int, cellSize: Int) {
@@ -29,10 +32,20 @@ fun Intent.putExtras(
     putExtra(ExtraUtils.DIFFICULTY, difficulty);
 }
 
-fun Intent.putExtra(extraUtils: ExtraUtils, value: Int) = putExtra(extraUtils.name, value)
-fun Intent.putExtra(extraUtils: ExtraUtils, value: Serializable) = putExtra(extraUtils.name, value);
-fun Intent.getIntExtra(extraUtils: ExtraUtils, default: Int) =
-    getIntExtra(extraUtils.name, default);
+fun <T> Intent.putExtra(extraUtils: ExtraUtils, value: T) {
+    when (value) {
+        is Int -> putExtra(extraUtils.name, value)
+        is Serializable -> putExtra(extraUtils.name, value)
+    }
+}
 
-fun <T : Serializable> Intent.getExtra(extraUtils: ExtraUtils, default: T) =
-    if (hasExtra(extraUtils.name)) (getSerializableExtra(extraUtils.name) ?: default) as T else default
+@Suppress("UNCHECKED_CAST")
+fun <T> Intent.getExtra(extraUtils: ExtraUtils, default: T): T {
+    return when (default) {
+        is Int -> getIntExtra(extraUtils.name, default) as T;
+        is Double -> getDoubleExtra(extraUtils.name, default) as T
+        is Serializable -> if (hasExtra(extraUtils.name)) (getSerializableExtra(extraUtils.name)
+            ?: default) as T else default
+        else -> throw IllegalArgumentException()
+    }
+}

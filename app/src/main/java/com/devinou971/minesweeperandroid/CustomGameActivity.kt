@@ -4,10 +4,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
-import com.devinou971.minesweeperandroid.utils.Difficulty
-import com.devinou971.minesweeperandroid.utils.ExtraUtils
-import com.devinou971.minesweeperandroid.utils.getIntExtra
-import com.devinou971.minesweeperandroid.utils.putExtras
+import com.devinou971.minesweeperandroid.utils.*
 import com.google.android.material.slider.Slider
 
 class CustomGameActivity : AppCompatActivity() {
@@ -19,11 +16,11 @@ class CustomGameActivity : AppCompatActivity() {
         val colsSlider: Slider = findViewById(R.id.colsSlider)
         val rowsSlider: Slider = findViewById(R.id.rowsSlider)
 
-        intent.getIntExtra(ExtraUtils.NB_COLS, 10).toFloat().also {
+        intent.getExtra(ExtraUtils.NB_COLS, 10).toFloat().also {
             colsSlider.valueTo = it
             colsSlider.value = it
         }
-        intent.getIntExtra(ExtraUtils.NB_ROWS, 10).toFloat().also {
+        intent.getExtra(ExtraUtils.NB_ROWS, 10).toFloat().also {
             rowsSlider.valueTo = it
             rowsSlider.value = it
         }
