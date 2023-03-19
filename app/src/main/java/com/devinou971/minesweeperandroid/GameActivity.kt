@@ -19,6 +19,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.scale
 import com.devinou971.minesweeperandroid.classes.MinesweeperBoard
 import com.devinou971.minesweeperandroid.extensions.Paint
+import com.devinou971.minesweeperandroid.extensions.PointF
 import com.devinou971.minesweeperandroid.extensions.setGone
 import com.devinou971.minesweeperandroid.extensions.setVisible
 import com.devinou971.minesweeperandroid.services.TimerService
@@ -79,8 +80,7 @@ class GameActivity : AppCompatActivity() {
     /**
      * FETCHING ALL THE VIEWS
      */
-    private fun bindViews()
-    {
+    private fun bindViews() {
         gameView = findViewById(R.id.gameView)
         playerWin = findViewById(R.id.playerWin)
         playerLose = findViewById(R.id.playerLose)
@@ -126,7 +126,7 @@ class GameActivity : AppCompatActivity() {
         // --------- CREATE ON CLICK EVENT FOR CANVAS ---------
         gameView.setOnTouchListener { _, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_UP)
-                gridClickedEvent(motionEvent.x, motionEvent.y)
+                gridClickedEvent(PointF(motionEvent))
 
             return@setOnTouchListener true
         }
@@ -154,52 +154,52 @@ class GameActivity : AppCompatActivity() {
         findViewById<Button>(R.id.anotherChance).setOnClickListener { revive() }
 
         // --------- ONCE THE VIEW IS AVAILABLE, WE DRAW THE GRID ON IT ---------
-        gameView.viewTreeObserver.addOnWindowFocusChangeListener {
-            if (!quit)
-                drawGrid()
-        }
+        gameView.viewTreeObserver.addOnWindowFocusChangeListener { if (!quit) drawGrid() }
 
         serviceIntent = Intent(applicationContext, TimerService::class.java)
         registerReceiver(updateTime, IntentFilter(TimerService.TIMER_UPDATED))
     }
 
-    private fun gridClickedEvent(x: Float, y: Float) {
+    private fun gridClickedEvent(position: PointF) {
+        act(position, mode)
+
         when (mode) {
             Mode.REVEAL -> {
                 if (gameBoard.isFirstTouch)
                     startTimer()
 
-                reveal(x, y)
-                if (gameBoard.won()) {
-                    Toast.makeText(this, "You win GG!", Toast.LENGTH_LONG).show()
-                    gameView.setGone()
-                    playerWin.setVisible()
+                val toastText: String
+                val nextScreen: ConstraintLayout?
 
-                    stopTimer()
+                when {
+                    gameBoard.won() -> {
+                        toastText = "You win GG!"
+                        nextScreen = playerWin
 
-                    Thread {
-                        AppDatabase.getAppDataBase(this).gameDataDAO()
-                            .insertGameData(GameData(null, this.time.toInt(), this.gameMode))
-                    }.start()
-                } else if (gameBoard.gameOver) {
-                    Toast.makeText(this, "Game Over", Toast.LENGTH_LONG).show()
-                    gameView.setGone()
-                    playerLose.setVisible()
-
-                    stopTimer()
+                        Thread {
+                            AppDatabase.getAppDataBase(this).gameDataDAO()
+                                .insertGameData(GameData(null, this.time.toInt(), this.gameMode))
+                        }.start()
+                    }
+                    gameBoard.gameOver -> {
+                        toastText = "Game Over"
+                        nextScreen = playerLose
+                    }
+                    else -> return
                 }
+
+                stopTimer()
+
+                Toast.makeText(this, toastText, Toast.LENGTH_LONG).show()
+                gameView.setGone()
+                nextScreen.setVisible()
             }
 
-            Mode.FLAG -> {
-                flag(x, y)
-                labelNbFlagsRemaining.text = gameBoard.nbFlags.toString()
-            }
+            Mode.FLAG -> labelNbFlagsRemaining.text = gameBoard.nbFlags.toString()
         }
     }
 
-    private fun replay() {
-        resetTimer()
-        gameBoard = MinesweeperBoard(nbRows, nbCols, nbBombs)
+    private fun setGameView() {
         playerWin.setGone()
         playerLose.setGone()
         gameView.setVisible()
@@ -208,16 +208,19 @@ class GameActivity : AppCompatActivity() {
         drawGrid()
     }
 
+    private fun replay() {
+        resetTimer()
+        gameBoard = MinesweeperBoard(nbRows, nbCols, nbBombs)
+
+        setGameView()
+    }
+
     private fun revive() {
         gameBoard.gameOver = false
         gameBoard.revive()
 
-        playerWin.setGone()
-        playerLose.setVisible()
-        gameView.setVisible()
+        setGameView()
 
-        labelNbFlagsRemaining.text = gameBoard.nbFlags.toString()
-        drawGrid()
         startTimer()
     }
 
@@ -226,21 +229,22 @@ class GameActivity : AppCompatActivity() {
         startActivity(Intent(this, MenuActivity::class.java))
     }
 
-    private fun reveal(x: Float, y: Float) {
-        val trueX = (x / cellSize).toInt()
-        val trueY = (y / cellSize).toInt()
-        if (trueX in 0 until gameBoard.nbCols && trueY in 0 until gameBoard.nbRows) {
-            gameBoard.reveal(Point(trueX, trueY))
-            drawGrid()
-        }
-    }
+    private fun gridPosition(position: PointF) =
+        Point((position.x / cellSize).toInt(), (position.y / cellSize).toInt())
 
-    private fun flag(x: Float, y: Float) {
-        val trueX = (x / cellSize).toInt()
-        val trueY = (y / cellSize).toInt()
-        if (trueX in 0 until gameBoard.nbCols && trueY in 0 until gameBoard.nbRows) {
-            gameBoard.flag(Point(trueX, trueY))
-            drawGrid()
+    private fun act(position: PointF, mode: Mode) {
+        val gridPosition = gridPosition(position)
+
+        if (gridPosition.x !in 0 until gameBoard.nbCols ||
+            gridPosition.y !in 0 until gameBoard.nbRows
+        )
+            return
+
+        gameBoard.apply {
+            when (mode) {
+                Mode.REVEAL -> this::reveal
+                Mode.FLAG -> this::flag
+            }(gridPosition)
         }
     }
 
