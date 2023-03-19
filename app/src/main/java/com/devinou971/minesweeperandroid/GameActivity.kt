@@ -262,9 +262,9 @@ class GameActivity : AppCompatActivity() {
             "#" to tileIcon
         )
 
-        for (y in 0 until gameBoard.grid.size)
-            for (x in 0 until gameBoard.grid[0].size)
-                when (val res = gameBoard.grid[y][x].toString()) {
+        for (y in 0 until gameBoard.rows)
+            for (x in 0 until gameBoard.columns)
+                when (val res = gameBoard[y, x].toString()) {
                     "B", "F", "#" -> drawBitmap(icons[res]!!, x, y)
                     "0" -> {} // We don't display when there are no bombs
                     else -> {

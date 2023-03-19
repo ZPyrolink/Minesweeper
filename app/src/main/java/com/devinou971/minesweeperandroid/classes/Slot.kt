@@ -23,11 +23,9 @@ class Slot {
 
     fun nextTo(o: Slot) = position.nextTo(o.position)
 
-    fun getUnseenNeighbors(grid: MutableList<MutableList<Slot>>): MutableList<Slot> {
-        val neighbors = mutableListOf<Slot>()
-        grid.forEach { line -> neighbors.addAll(line.filter { x -> nextTo(x) && !x.isRevealed }) }
-        return neighbors
-    }
+    fun getUnseenNeighbors(grid: Array<Array<Slot>>) = grid.asSequence()
+        .flatMap { it.asSequence() }
+        .filter { x -> nextTo(x) && !x.isRevealed }
 
     fun xRayView() = if (isBomb) "B" else "$nbBombs"
 
