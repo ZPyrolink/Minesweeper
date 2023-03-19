@@ -7,13 +7,14 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.*
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.view.MotionEvent
 import android.view.SurfaceView
 import android.view.View
-import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.DrawableRes
 import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -24,6 +25,9 @@ import com.devinou971.minesweeperandroid.services.TimerService
 import com.devinou971.minesweeperandroid.storageclasses.AppDatabase
 import com.devinou971.minesweeperandroid.storageclasses.GameData
 import com.devinou971.minesweeperandroid.utils.*
+import java.sql.Time
+import java.util.*
+import java.util.concurrent.TimeUnit
 
 class GameActivity : AppCompatActivity() {
     private lateinit var bombIcon: Bitmap
@@ -102,31 +106,22 @@ class GameActivity : AppCompatActivity() {
             findViewById<View>(id).setOnClickListener(listener)
     }
 
+    private fun getIcons() {
+        bombIcon = getIcon(R.drawable.bombicon)
+        flagIcon = getIcon(R.drawable.flagicon)
+        tileIcon = getIcon(R.drawable.emptytile)
+    }
+
+    private fun getIcon(@DrawableRes resource: Int) =
+        BitmapFactory.decodeResource(resources, resource).scale(cellSize, cellSize, false)
+
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_game)
 
-        Thread {
-            AppDatabase.getAppDataBase(this).gameDataDAO().getAllGameData().apply {
-                while (moveToNext()) {
-                    val index = getColumnIndexOrThrow("game_type")
-                    val lastName = getString(index)
-                    println(lastName)
-                    println(columnNames)
-                }
-            }
-        }.start()
-
         getExtras(intent)
-
-        fun getIcon(resource: Int) =
-            BitmapFactory.decodeResource(resources, resource).scale(cellSize, cellSize, false)
-
-        bombIcon = getIcon(R.drawable.bombicon)
-        flagIcon = getIcon(R.drawable.flagicon)
-        tileIcon = getIcon(R.drawable.emptytile)
-
+        getIcons()
         bindViews()
 
         gameBoard = MinesweeperBoard(nbRows, nbCols, nbBombs)
@@ -246,7 +241,7 @@ class GameActivity : AppCompatActivity() {
             when (mode) {
                 Mode.REVEAL -> this::reveal
                 Mode.FLAG -> this::flag
-            }(gridPosition)
+            }.invoke(gridPosition)
         }
 
         drawGrid()
@@ -254,23 +249,25 @@ class GameActivity : AppCompatActivity() {
 
     private fun drawGrid() {
         val canvas = gameView.holder.lockCanvas()
-        canvas.drawColor(this.applicationContext.getColor(R.color.bgColor), PorterDuff.Mode.CLEAR)
+        canvas.drawColor(applicationContext.getColor(R.color.bgColor), PorterDuff.Mode.CLEAR)
         val textOffset = Point(cellSize / 3, cellSize * 2 / 3)
 
         fun drawBitmap(icon: Bitmap, x: Int, y: Int) =
-            canvas.drawBitmap(icon, x * cellSize.toFloat(), y * cellSize.toFloat(), Paint(0))
+            canvas.drawBitmap(
+                icon, x * cellSize.toFloat(), y * cellSize.toFloat(),
+                Paint(0)
+            )
 
-        for (y in 0 until gameBoard.grid.size) {
-            for (x in 0 until gameBoard.grid[0].size) {
+        val icons = mapOf(
+            "B" to bombIcon,
+            "F" to flagIcon,
+            "#" to tileIcon
+        )
+
+        for (y in 0 until gameBoard.grid.size)
+            for (x in 0 until gameBoard.grid[0].size)
                 when (val res = gameBoard.grid[y][x].toString()) {
-                    "B", "F", "#" -> drawBitmap(
-                        when (res) {
-                            "B" -> bombIcon
-                            "F" -> flagIcon
-                            "#" -> tileIcon
-                            else -> throw IllegalArgumentException()
-                        }, x, y
-                    )
+                    "B", "F", "#" -> drawBitmap(icons[res]!!, x, y)
                     "0" -> {} // We don't display when there are no bombs
                     else -> {
                         canvas.drawText(
@@ -281,17 +278,14 @@ class GameActivity : AppCompatActivity() {
                         )
                     }
                 }
-            }
-        }
         gameView.holder.unlockCanvasAndPost(canvas)
     }
-
 
     private val updateTime: BroadcastReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             time = intent.getDoubleExtra(TimerService.TIME_EXTRA, 0.0)
-            val seconds = time.toInt() % 60
-            val minutes = (time / 60).toInt()
+            val seconds = time.toInt() % TimeUnit.MINUTES.toSeconds(1)
+            val minutes = TimeUnit.SECONDS.toMinutes(time.toLong()).toInt()
             findViewById<TextView>(R.id.gameTimerView).text = resources.getString(
                 R.string.game_timer,
                 minutes.toString().padStart(2, '0'),
