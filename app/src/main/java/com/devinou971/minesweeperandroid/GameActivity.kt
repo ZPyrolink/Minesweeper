@@ -14,14 +14,12 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.scale
 import com.devinou971.minesweeperandroid.classes.MinesweeperBoard
-import com.devinou971.minesweeperandroid.extensions.Paint
-import com.devinou971.minesweeperandroid.extensions.PointF
-import com.devinou971.minesweeperandroid.extensions.setGone
-import com.devinou971.minesweeperandroid.extensions.setVisible
+import com.devinou971.minesweeperandroid.extensions.*
 import com.devinou971.minesweeperandroid.services.TimerService
 import com.devinou971.minesweeperandroid.storageclasses.AppDatabase
 import com.devinou971.minesweeperandroid.storageclasses.GameData
@@ -65,10 +63,11 @@ class GameActivity : AppCompatActivity() {
         REVEAL(R.drawable.pickaxeicon),
         FLAG(R.drawable.flagicon);
 
-        fun next() = when (this) {
-            REVEAL -> FLAG
-            FLAG -> REVEAL
-        }
+        val next
+            get() = when (this) {
+                REVEAL -> FLAG
+                FLAG -> REVEAL
+            }
     }
 
     private var mode: Mode = Mode.REVEAL
@@ -87,6 +86,22 @@ class GameActivity : AppCompatActivity() {
         labelNbFlagsRemaining = findViewById(R.id.nbFlagsRemaining)
     }
 
+    /**
+     * GETTING THE DIFFERENT VALUES SENT FROM OTHER ACTIVITIES
+     */
+    private fun getExtras(intent: Intent) = intent.apply {
+        nbBombs = getIntExtra(ExtraUtils.NB_BOMBS, 10)
+        nbRows = getIntExtra(ExtraUtils.NB_ROWS, 10)
+        nbCols = getIntExtra(ExtraUtils.NB_COLS, 10)
+        cellSize = getIntExtra(ExtraUtils.CELL_SIZE, 100)
+        gameMode = getExtra(ExtraUtils.DIFFICULTY, Difficulty.CUSTOM)
+    }
+
+    private fun setOnClickListeners(@IdRes vararg viewIds: Int, listener: View.OnClickListener) {
+        for (id in viewIds)
+            findViewById<View>(id).setOnClickListener(listener)
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -103,14 +118,7 @@ class GameActivity : AppCompatActivity() {
             }
         }.start()
 
-        // --------- GETTING THE DIFFERENT VALUES SENT FROM OTHER ACTIVITIES ---------
-        intent.apply {
-            nbBombs = getIntExtra(ExtraUtils.NB_BOMBS, 10)
-            nbRows = getIntExtra(ExtraUtils.NB_ROWS, 10)
-            nbCols = getIntExtra(ExtraUtils.NB_COLS, 10)
-            cellSize = getIntExtra(ExtraUtils.CELL_SIZE, 100)
-            gameMode = getExtra(ExtraUtils.DIFFICULTY, Difficulty.CUSTOM)
-        }
+        getExtras(intent)
 
         fun getIcon(resource: Int) =
             BitmapFactory.decodeResource(resources, resource).scale(cellSize, cellSize, false)
@@ -135,23 +143,20 @@ class GameActivity : AppCompatActivity() {
         gameView.holder.setFormat(PixelFormat.TRANSPARENT)
 
         // --------- ONCLICK EVENT FOR THE "REPLAY" BUTTON
-        for (id in arrayOf(R.id.reloadBoard, R.id.replayButton, R.id.replayButton2))
-            findViewById<View>(id).setOnClickListener { replay() }
-
-        for (id in arrayOf(R.id.returnMenuButton, R.id.returnMenuButton2))
-            findViewById<Button>(id).setOnClickListener { goToMenu() }
+        setOnClickListeners(R.id.reloadBoard, R.id.replayButton, R.id.replayButton2) { replay() }
+        setOnClickListeners(R.id.returnMenuButton, R.id.returnMenuButton2) { goToMenu() }
 
         // --------- ONCLICK EVENT TO SWITCH BETWEEN FLAG AND REVEAL MODE ---------
         findViewById<ImageView>(R.id.switchmode).apply {
             setBackgroundResource(R.drawable.pickaxeicon)
             setOnClickListener {
-                mode = mode.next()
+                mode = mode.next
                 setBackgroundResource(mode.icon)
             }
         }
 
         labelNbFlagsRemaining.text = gameBoard.nbFlags.toString()
-        findViewById<Button>(R.id.anotherChance).setOnClickListener { revive() }
+        setOnClickListeners(R.id.anotherChance) { revive() }
 
         // --------- ONCE THE VIEW IS AVAILABLE, WE DRAW THE GRID ON IT ---------
         gameView.viewTreeObserver.addOnWindowFocusChangeListener { if (!quit) drawGrid() }
@@ -165,11 +170,8 @@ class GameActivity : AppCompatActivity() {
 
         when (mode) {
             Mode.REVEAL -> {
-                if (gameBoard.isFirstTouch)
-                    startTimer()
-
                 val toastText: String
-                val nextScreen: ConstraintLayout?
+                val nextScreen: ConstraintLayout
 
                 when {
                     gameBoard.won() -> {
@@ -199,6 +201,18 @@ class GameActivity : AppCompatActivity() {
         }
     }
 
+    private fun replay() {
+        resetTimer()
+        gameBoard = MinesweeperBoard(nbRows, nbCols, nbBombs)
+        setGameView()
+    }
+
+    private fun revive() {
+        gameBoard.revive()
+        setGameView()
+        startTimer()
+    }
+
     private fun setGameView() {
         playerWin.setGone()
         playerLose.setGone()
@@ -208,31 +222,19 @@ class GameActivity : AppCompatActivity() {
         drawGrid()
     }
 
-    private fun replay() {
-        resetTimer()
-        gameBoard = MinesweeperBoard(nbRows, nbCols, nbBombs)
-
-        setGameView()
-    }
-
-    private fun revive() {
-        gameBoard.gameOver = false
-        gameBoard.revive()
-
-        setGameView()
-
-        startTimer()
-    }
-
     private fun goToMenu() {
         quit = true
         startActivity(Intent(this, MenuActivity::class.java))
+        finish()
     }
 
     private fun gridPosition(position: PointF) =
         Point((position.x / cellSize).toInt(), (position.y / cellSize).toInt())
 
     private fun act(position: PointF, mode: Mode) {
+        if (mode == Mode.REVEAL && gameBoard.isFirstTouch)
+            startTimer()
+
         val gridPosition = gridPosition(position)
 
         if (gridPosition.x !in 0 until gameBoard.nbCols ||
@@ -246,6 +248,8 @@ class GameActivity : AppCompatActivity() {
                 Mode.FLAG -> this::flag
             }(gridPosition)
         }
+
+        drawGrid()
     }
 
     private fun drawGrid() {
