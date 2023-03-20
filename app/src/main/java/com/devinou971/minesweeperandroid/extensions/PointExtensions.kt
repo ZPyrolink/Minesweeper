@@ -16,11 +16,16 @@ fun Point.countNeighbors(l: MutableList<Point>): Int {
 operator fun Point.plus(other: Point) = Point(x + other.x, y + other.y)
 
 fun Point.until(rows: Int, columns: Int) = object : Iterator<Point> {
-    private var current = Point(x, y)
+    private lateinit var current: Point
 
-    private fun nextIndices(): Point = if (current.x + 1 >= columns)
-        Point(x, current.y + 1) else
-        current + Point(1, 0)
+    private fun nextIndices(): Point {
+        if (!::current.isInitialized)
+            return Point(x, y)
+
+        return if (current.x + 1 >= columns)
+            Point(x, current.y + 1) else
+            current + Point(1, 0)
+    }
 
     override fun hasNext(): Boolean {
         val next = nextIndices()

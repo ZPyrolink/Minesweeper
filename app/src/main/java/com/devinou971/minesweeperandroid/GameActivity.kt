@@ -262,20 +262,19 @@ class GameActivity : AppCompatActivity() {
             "#" to tileIcon
         )
 
-        for (y in 0 until gameBoard.rows)
-            for (x in 0 until gameBoard.columns)
-                when (val res = gameBoard[y, x].toString()) {
-                    "B", "F", "#" -> drawBitmap(icons[res]!!, x, y)
-                    "0" -> {} // We don't display when there are no bombs
-                    else -> {
-                        canvas.drawText(
-                            res,
-                            x * cellSize + textOffset.x.toFloat(),
-                            y * cellSize + textOffset.y.toFloat(),
-                            paints[res.toInt() - 1]
-                        )
-                    }
+        for (p in Point().until(gameBoard.rows, gameBoard.columns))
+            when (val res = gameBoard[p].toString()) {
+                "B", "F", "#" -> drawBitmap(icons[res]!!, p.x, p.y)
+                "0" -> {} // We don't display when there are no bombs
+                else -> {
+                    canvas.drawText(
+                        res,
+                        p.x * cellSize + textOffset.x.toFloat(),
+                        p.y * cellSize + textOffset.y.toFloat(),
+                        paints[res.toInt() - 1]
+                    )
                 }
+            }
         gameView.holder.unlockCanvasAndPost(canvas)
     }
 
