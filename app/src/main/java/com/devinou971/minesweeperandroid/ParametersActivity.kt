@@ -64,17 +64,20 @@ class ParametersActivity : AppCompatActivity() {
                     if (it == null)
                         return@doAfterTextChanged
 
-                    colorButton.setBackgroundColor(
-                        Color.parseColor(
-                            "#" + when (it.length) {
-                                6 -> it.toString()
-                                3 -> it[0].toString().repeat(2) +
-                                        it[1].toString().repeat(2) +
-                                        it[2].toString().repeat(2)
-                                else -> return@doAfterTextChanged
-                            }
-                        )
+
+                    val newColor = Color.parseColor(
+                        "#" + when (it.length) {
+                            6 -> it.toString()
+                            3 -> it[0].toString().repeat(2) +
+                                    it[1].toString().repeat(2) +
+                                    it[2].toString().repeat(2)
+                            else -> return@doAfterTextChanged
+                        }
                     )
+
+                    colorButton.setBackgroundColor(newColor)
+                    Settings.colors[index] = newColor
+                    Settings.save(context)
                 }
             })
         })
