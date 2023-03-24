@@ -3,6 +3,8 @@ package com.devinou971.minesweeperandroid.storageclasses
 import android.database.Cursor
 import androidx.room.Dao
 import androidx.room.Delete
+import androidx.room.DeleteColumn
+import androidx.room.DeleteTable
 import androidx.room.Insert
 import androidx.room.Query
 

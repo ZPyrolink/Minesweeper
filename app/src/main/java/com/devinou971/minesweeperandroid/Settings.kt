@@ -15,10 +15,10 @@ object Settings {
         if (settings.contains("init"))
             get(settings)
         else
-            create()
+            reset()
     }
 
-    private fun create() {
+    public fun reset() {
         colors = intArrayOf(
             Color.BLUE,
             Color.GREEN,

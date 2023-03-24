@@ -25,6 +25,10 @@ class MenuActivity : AppCompatActivity() {
             findViewById<Button>(buttonId).setOnClickListener { startGame(buttonId) }
 
         findViewById<ImageButton>(R.id.parameterButton).setOnClickListener { openSettings() }
+    }
+
+    override fun onResume() {
+        super.onResume()
 
         val highscoreTexts = mapOf<Difficulty, TextView>(
             Pair(Difficulty.EASY, findViewById(R.id.bestScoreEasy)),
@@ -35,15 +39,18 @@ class MenuActivity : AppCompatActivity() {
         Thread {
             for (difficulty in highscoreTexts.keys) {
                 val bestScore = AppDatabase.getAppDataBase(this).gameDataDAO()
-                    .getBestTimeForDifficulty(difficulty.id) ?: continue
+                    .getBestTimeForDifficulty(difficulty.id)
 
-                val minutes = TimeUnit.SECONDS.toMinutes(bestScore.time.toLong()).toInt()
-                val seconds = bestScore.time % TimeUnit.MINUTES.toSeconds(1)
+                val str = if (bestScore == null) {
+                    getString(R.string.no_highscore_yet)
+                } else {
+                    val minutes = TimeUnit.SECONDS.toMinutes(bestScore.time.toLong()).toInt()
+                    val seconds = bestScore.time % TimeUnit.MINUTES.toSeconds(1)
 
-                runOnUiThread {
-                    highscoreTexts[difficulty]!!.text =
-                        resources.getString(R.string.highscore, minutes, seconds)
+                    getString(R.string.highscore, minutes, seconds)
                 }
+
+                runOnUiThread { highscoreTexts[difficulty]!!.text = str }
             }
         }.start()
     }

@@ -9,18 +9,49 @@ import android.view.inputmethod.EditorInfo
 import android.widget.*
 import android.widget.LinearLayout.LayoutParams
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.get
 import androidx.core.widget.doAfterTextChanged
 import com.devinou971.minesweeperandroid.components.RgbColorPicker
+import com.devinou971.minesweeperandroid.extensions.startThread
+import com.devinou971.minesweeperandroid.extensions.toColorString
+import com.devinou971.minesweeperandroid.storageclasses.AppDatabase
 
 class ParametersActivity : AppCompatActivity() {
+    private lateinit var colorLayout: LinearLayout
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_parameters)
 
-        val root = findViewById<LinearLayout>(R.id.colorsLayout)
+        colorLayout = findViewById(R.id.colorsLayout)
 
         for (i in 0 until Settings.colors.size)
-            createColorPicker(root, i)
+            createColorPicker(colorLayout, i)
+
+        findViewById<Button>(R.id.clear_settings).setOnClickListener {
+            Settings.reset()
+            updateColorPickers()
+        }
+        findViewById<Button>(R.id.clear_data).setOnClickListener {
+            startThread {
+                AppDatabase.getAppDataBase(this).clearAllTables()
+
+                runOnUiThread {
+                    Toast.makeText(this, "Data removed!", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private fun updateColorPickers() {
+        for (i in 1..colorLayout.childCount) {
+            val ll = colorLayout[i] as LinearLayout
+            val b = ll[2] as RgbColorPicker
+            val t = ll[3] as TextView
+
+            b.color = Settings.colors[i]
+            t.text = Settings.colors[i].toColorString()
+        }
     }
 
     private fun createColorPicker(layout: ViewGroup, index: Int) =
@@ -92,10 +123,7 @@ class ParametersActivity : AppCompatActivity() {
                 filters = arrayOf(InputFilter.LengthFilter(6))
                 inputType = EditorInfo.TYPE_CLASS_TEXT
 
-                setText(
-                    (Settings.colors[index] and 0xff000000.inv().toInt()).toString(16)
-                        .padStart(6, '0')
-                )
+                setText(Settings.colors[index].toColorString())
 
                 doAfterTextChanged {
                     if (it == null)
