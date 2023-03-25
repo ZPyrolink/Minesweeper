@@ -28,7 +28,7 @@
             android:layout_height="match_parent"
             android:layout_weight=".25"
             android:gravity="center"
-            android:text="Red"
+            android:text="@string/red"
             android:textColor="@color/red" />
     </LinearLayout>
 
@@ -54,7 +54,7 @@
             android:layout_height="match_parent"
             android:layout_weight=".25"
             android:gravity="center"
-            android:text="Green"
+            android:text="@string/green"
             android:textColor="@color/green" />
     </LinearLayout>
 
@@ -80,7 +80,7 @@
             android:layout_height="match_parent"
             android:layout_weight=".25"
             android:gravity="center"
-            android:text="Blue"
+            android:text="@string/blue"
             android:textColor="@color/blue" />
     </LinearLayout>
 

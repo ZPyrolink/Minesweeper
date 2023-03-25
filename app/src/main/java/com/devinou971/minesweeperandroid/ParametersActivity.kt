@@ -1,7 +1,6 @@
 package com.devinou971.minesweeperandroid
 
 import android.app.AlertDialog
-import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.text.InputFilter
