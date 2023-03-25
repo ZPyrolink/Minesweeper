@@ -1,6 +1,7 @@
 package com.devinou971.minesweeperandroid
 
 import android.app.AlertDialog
+import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.text.InputFilter
@@ -11,6 +12,9 @@ import android.widget.LinearLayout.LayoutParams
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.get
 import androidx.core.widget.doAfterTextChanged
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.devinou971.minesweeperandroid.adapters.ColorPickersAdapter
 import com.devinou971.minesweeperandroid.components.RgbColorPicker
 import com.devinou971.minesweeperandroid.extensions.startThread
 import com.devinou971.minesweeperandroid.extensions.toColorString
@@ -25,8 +29,10 @@ class ParametersActivity : AppCompatActivity() {
 
         colorLayout = findViewById(R.id.colorsLayout)
 
-        for (i in 0 until Settings.colors.size)
-            createColorPicker(colorLayout, i)
+        findViewById<RecyclerView>(R.id.rv).apply {
+            layoutManager = LinearLayoutManager(context)
+            adapter = ColorPickersAdapter(Settings.colors)
+        }
 
         findViewById<Button>(R.id.clear_settings).setOnClickListener {
             Settings.reset()
@@ -54,6 +60,7 @@ class ParametersActivity : AppCompatActivity() {
         }
     }
 
+    @Deprecated("Use the ColorPickerAdapter")
     private fun createColorPicker(layout: ViewGroup, index: Int) =
         layout.addView(LinearLayout(this).apply {
             layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT)
