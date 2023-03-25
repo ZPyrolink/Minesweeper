@@ -86,17 +86,27 @@ class ColorPickersAdapter(private val array: IntArray) :
                     if (it == null)
                         return@doAfterTextChanged
 
-                    updateColor(
-                        button, Color.parseColor(
-                            "#" + when (it.length) {
-                                6 -> it.toString()
-                                3 -> it[0].toString().repeat(2) +
-                                        it[1].toString().repeat(2) +
-                                        it[2].toString().repeat(2)
-                                else -> return@doAfterTextChanged
-                            }
+                    setTextColor(resources.getColor(R.color.black, context.theme))
+
+                    try {
+                        updateColor(
+                            button, Color.parseColor(
+                                "#" + when (it.length) {
+                                    6 -> it.toString()
+                                    3 -> it[0].toString().repeat(2) +
+                                            it[1].toString().repeat(2) +
+                                            it[2].toString().repeat(2)
+                                    else -> {
+                                        setTextColor(Color.RED)
+                                        return@doAfterTextChanged
+                                    }
+                                }
+                            )
                         )
-                    )
+                    }
+                    catch (e: NumberFormatException) {
+                        setTextColor(Color.RED)
+                    }
                 }
             }
         }
