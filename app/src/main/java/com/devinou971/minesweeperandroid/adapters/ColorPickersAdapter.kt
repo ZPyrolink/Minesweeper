@@ -1,6 +1,5 @@
 package com.devinou971.minesweeperandroid.adapters
 
-import android.app.AlertDialog
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
@@ -13,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.devinou971.minesweeperandroid.R
 import com.devinou971.minesweeperandroid.Settings
 import com.devinou971.minesweeperandroid.components.RgbColorPicker
+import com.devinou971.minesweeperandroid.extensions.AlertDialogExt
 import com.devinou971.minesweeperandroid.extensions.toColorString
 
 class ColorPickersAdapter(private val array: IntArray) :
@@ -33,7 +33,8 @@ class ColorPickersAdapter(private val array: IntArray) :
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         ViewHolder(
-            LayoutInflater.from(parent.context).inflate(R.layout.color_picker_item, parent, false)
+            LayoutInflater.from(parent.context)
+                .inflate(R.layout.color_picker_item, parent, false)
         )
 
     override fun getItemCount() = array.size
@@ -52,31 +53,25 @@ class ColorPickersAdapter(private val array: IntArray) :
             button.apply {
                 setBackgroundColor(array[position])
                 setOnClickListener {
-                    val thisButton = this
-                    AlertDialog.Builder(context).apply {
-                        setTitle("Color picker")
+                    val colorPicker = RgbColorPicker(context, array[position])
 
-                        val colorPicker =
-                            RgbColorPicker(context, array[position])
-
-                        setView(colorPicker)
-
-                        setPositiveButton("Valider") { _, _ ->
+                    AlertDialogExt.createAndShow(
+                        context, "Color picker", colorPicker,
+                        Pair(context.getString(android.R.string.ok)) { _, _ ->
                             val newColor = Color.rgb(
                                 colorPicker.red,
                                 colorPicker.green,
                                 colorPicker.blue
                             )
 
-                            updateColor(thisButton, newColor)
+                            updateColor(this, newColor)
                             holder.text.setText(
                                 (newColor and 0xff000000.inv().toInt()).toString(16)
                                     .padStart(6, '0')
                             )
-                        }
-
-                        setNegativeButton("Annuler") { _, _ -> }
-                    }.create().show()
+                        },
+                        Pair(context.getString(android.R.string.cancel), null)
+                    )
                 }
             }
 
@@ -86,7 +81,14 @@ class ColorPickersAdapter(private val array: IntArray) :
                     if (it == null)
                         return@doAfterTextChanged
 
-                    setTextColor(resources.getColor(R.color.black, context.theme))
+                    println(textColors)
+
+                    setTextColor(
+                        resources.getColor(
+                            android.R.color.primary_text_dark,
+                            context.theme
+                        )
+                    )
 
                     try {
                         updateColor(
@@ -103,8 +105,7 @@ class ColorPickersAdapter(private val array: IntArray) :
                                 }
                             )
                         )
-                    }
-                    catch (e: NumberFormatException) {
+                    } catch (e: NumberFormatException) {
                         setTextColor(Color.RED)
                     }
                 }

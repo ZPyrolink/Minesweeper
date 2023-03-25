@@ -14,9 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.devinou971.minesweeperandroid.adapters.ColorPickersAdapter
 import com.devinou971.minesweeperandroid.components.RgbColorPicker
-import com.devinou971.minesweeperandroid.extensions.ToastExt
-import com.devinou971.minesweeperandroid.extensions.startThread
-import com.devinou971.minesweeperandroid.extensions.toColorString
+import com.devinou971.minesweeperandroid.extensions.*
 import com.devinou971.minesweeperandroid.storageclasses.AppDatabase
 
 class ParametersActivity : AppCompatActivity() {
