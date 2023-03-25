@@ -9,4 +9,8 @@
     <color name="light_blue">#add8e6</color>
     <color name="blue">#00f</color>
     <color name="dark_blue">#00008b</color>
+
+    <color name="magenta">#f0f</color>
+    <color name="cyan">#0ff</color>
+    <color name="yellow">#ff0</color>
 </resources>

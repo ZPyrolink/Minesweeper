@@ -30,7 +30,7 @@ class ParametersActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.clear_settings).setOnClickListener {
-            Settings.reset()
+            Settings.reset(this)
             Settings.save(this)
             colorsList.adapter = ColorPickersAdapter(Settings.colors)
 

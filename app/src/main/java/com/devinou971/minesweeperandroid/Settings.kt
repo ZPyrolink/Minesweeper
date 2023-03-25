@@ -2,8 +2,8 @@ package com.devinou971.minesweeperandroid
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.graphics.Color
 import androidx.core.content.edit
+import androidx.core.content.res.use
 
 object Settings {
     lateinit var colors: IntArray
@@ -15,21 +15,13 @@ object Settings {
         if (settings.contains("init"))
             get(settings)
         else
-            reset()
+            reset(context)
     }
 
-    public fun reset() {
-        colors = intArrayOf(
-            Color.BLUE,
-            Color.GREEN,
-            Color.RED,
-            Color.rgb(0, 0, 127),
-            Color.rgb(127, 0, 0),
-            Color.rgb(255, 192, 203),
-            Color.MAGENTA,
-            Color.CYAN,
-            Color.YELLOW
-        )
+    public fun reset(context: Context) {
+        context.resources.obtainTypedArray(R.array.default_number_colors).use {
+            colors = IntArray(it.length()) {i -> it.getColor(i, 0)}
+        }
     }
 
     private fun get(settings: SharedPreferences) = settings.run {
