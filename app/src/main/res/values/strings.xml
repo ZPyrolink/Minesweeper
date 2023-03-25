@@ -28,7 +28,9 @@
 
     <string name="colors">Values of the colors</string>
     <string name="clear_settings">Clear settings</string>
+    <string name="settings_cleared">Settings cleared</string>
     <string name="clear_data">Clear data</string>
+    <string name="data_cleared">Data cleared</string>
     <string name="rgb_hint">RRGGBB</string>
     <string name="red">Red</string>
     <string name="green">Green</string>

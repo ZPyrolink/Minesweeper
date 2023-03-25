@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.devinou971.minesweeperandroid.adapters.ColorPickersAdapter
 import com.devinou971.minesweeperandroid.components.RgbColorPicker
+import com.devinou971.minesweeperandroid.extensions.ToastExt
 import com.devinou971.minesweeperandroid.extensions.startThread
 import com.devinou971.minesweeperandroid.extensions.toColorString
 import com.devinou971.minesweeperandroid.storageclasses.AppDatabase
@@ -32,14 +33,19 @@ class ParametersActivity : AppCompatActivity() {
 
         findViewById<Button>(R.id.clear_settings).setOnClickListener {
             Settings.reset()
+            Settings.save(this)
             colorsList.adapter = ColorPickersAdapter(Settings.colors)
+
+            runOnUiThread {
+                ToastExt.showText(this, R.string.settings_cleared, Toast.LENGTH_SHORT)
+            }
         }
         findViewById<Button>(R.id.clear_data).setOnClickListener {
             startThread {
                 AppDatabase.getAppDataBase(this).clearAllTables()
 
                 runOnUiThread {
-                    Toast.makeText(this, "Data removed!", Toast.LENGTH_SHORT).show()
+                    ToastExt.showText(this, "Data cleared!", Toast.LENGTH_SHORT)
                 }
             }
         }
