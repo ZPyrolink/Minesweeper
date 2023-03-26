@@ -93,9 +93,9 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun getIcons() {
-        bombIcon = getIcon(R.drawable.bombicon)
-        flagIcon = getIcon(R.drawable.flagicon)
-        tileIcon = getIcon(R.drawable.emptytile)
+        bombIcon = getIcon(Settings.theme[R.drawable.bombicon])
+        flagIcon = getIcon(Settings.theme[R.drawable.flagicon])
+        tileIcon = getIcon(Settings.theme[R.drawable.emptytile])
     }
 
     private fun getIcon(@DrawableRes resource: Int) =
@@ -129,10 +129,10 @@ class GameActivity : AppCompatActivity() {
 
         // --------- ONCLICK EVENT TO SWITCH BETWEEN FLAG AND REVEAL MODE ---------
         findViewById<ImageView>(R.id.switchmode).apply {
-            setBackgroundResource(R.drawable.pickaxeicon)
+            setBackgroundResource(Settings.theme[mode.icon])
             setOnClickListener {
                 mode = mode.next
-                setBackgroundResource(mode.icon)
+                setBackgroundResource(Settings.theme[mode.icon])
             }
         }
 
