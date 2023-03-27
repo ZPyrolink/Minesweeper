@@ -1,18 +1,22 @@
 package com.devinou971.minesweeperandroid
 
 import android.app.AlertDialog
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Bundle
 import android.text.InputFilter
+import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.*
 import android.widget.LinearLayout.LayoutParams
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.children
 import androidx.core.widget.doAfterTextChanged
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.devinou971.minesweeperandroid.adapters.ColorPickersAdapter
+import com.devinou971.minesweeperandroid.adapters.ThemeAdapter
 import com.devinou971.minesweeperandroid.components.RgbColorPicker
 import com.devinou971.minesweeperandroid.extensions.*
 import com.devinou971.minesweeperandroid.storageclasses.AppDatabase
@@ -27,6 +31,29 @@ class ParametersActivity : AppCompatActivity() {
         colorsList = findViewById<RecyclerView>(R.id.colors_list).apply {
             layoutManager = LinearLayoutManager(context)
             adapter = ColorPickersAdapter(Settings.colors)
+        }
+
+        findViewById<RecyclerView>(R.id.themes_list).apply {
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+
+            fun clearBackgroundThemes() {
+                for (child in children)
+                    child.background = null
+            }
+
+            adapter = ThemeAdapter(
+                Settings.Theme.values().map { theme ->
+                    BitmapFactory.decodeResource(
+                        resources, theme.icon
+                    ) to View.OnClickListener { v ->
+                        clearBackgroundThemes()
+                        v.setBackgroundColor(getColor(R.color.gainsboro))
+                        Settings.theme = theme
+
+                        Settings.save(context)
+                    }
+                }.toTypedArray(), Settings.theme.ordinal
+            )
         }
 
         findViewById<Button>(R.id.clear_settings).setOnClickListener {

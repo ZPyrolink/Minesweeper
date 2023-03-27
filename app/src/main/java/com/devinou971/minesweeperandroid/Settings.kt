@@ -13,7 +13,6 @@ object Settings {
         private set
 
     lateinit var theme: Theme
-        private set
 
     fun init(context: Context) {
         val settings = context.getSharedPreferences("Settings", Context.MODE_PRIVATE)
@@ -25,11 +24,12 @@ object Settings {
     }
 
     public fun reset(context: Context) {
-        context.resources.obtainTypedArray(R.array.default_number_colors).use {
-            colors = IntArray(it.length()) { i -> it.getColor(i, 0) }
+        context.resources.run {
+            obtainTypedArray(R.array.default_number_colors).use {
+                colors = IntArray(it.length()) { i -> it.getColor(i, 0) }
+            }
+            theme = Theme.valueOf(getString(R.string.default_theme))
         }
-
-        theme = Theme.DEFAULT
     }
 
     private fun get(settings: SharedPreferences) = settings.run {
@@ -48,18 +48,18 @@ object Settings {
         }
     }
 
-    enum class Theme(private val map: Map<Int, Int>) {
-        DEFAULT(mapOf()),
+    enum class Theme(private val map: Map<Int, Int>?, @DrawableRes val icon: Int) {
+        DEFAULT(null, D.bombicon),
         MINECRAFT(
             mapOf(
                 D.bombicon to D.bombicon_minecraft,
                 D.flagicon to D.flagicon_minecraft,
                 D.pickaxeicon to D.pickaxeicon_minecraft,
                 D.bombicon to D.bombicon_minecraft
-            )
+            ), D.bombicon_minecraft
         );
 
         @DrawableRes
-        operator fun get(resource: Int) = map[resource] ?: resource
+        operator fun get(resource: Int) = map?.get(resource) ?: resource
     }
 }
