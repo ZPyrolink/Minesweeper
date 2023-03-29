@@ -29,7 +29,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/colors"
+        android:text="@string/theme_title"
         android:textAlignment="center"
         android:textSize="25sp" />
 
@@ -52,20 +52,22 @@
 
         <Button
             android:id="@+id/clear_settings"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:text="@string/clear_settings" />
 
         <Space
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1" />
+            android:layout_weight=".5" />
 
         <Button
             android:id="@+id/clear_data"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="end|center"
+            android:layout_weight="1"
             android:text="@string/clear_data" />
     </LinearLayout>
 
