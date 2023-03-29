@@ -27,6 +27,7 @@
     <string name="highscore">%1d min %2$d sec</string>
 
     <string name="colors">Values of the colors</string>
+    <string name="theme_title">Themes</string>
     <string name="clear_settings">Clear settings</string>
     <string name="settings_cleared">Settings cleared</string>
     <string name="clear_data">Clear data</string>

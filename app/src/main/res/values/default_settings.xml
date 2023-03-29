@@ -11,4 +11,6 @@
         <item>@color/cyan</item>
         <item>@color/yellow</item>
     </array>
+
+    <string name="default_theme">DEFAULT</string>
 </resources>
