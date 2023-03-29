@@ -34,18 +34,6 @@ class GameActivity : AppCompatActivity() {
 
     private lateinit var gameMode: Difficulty
 
-    private val paints = arrayOf(
-        Paint(Color.BLUE, 50f),
-        Paint(Color.GREEN, 50f),
-        Paint(Color.RED, 50f),
-        Paint(Color.rgb(0, 0, 127), 50f),
-        Paint(Color.rgb(127, 0, 0), 50f),
-        Paint(Color.rgb(255, 192, 203), 50f),
-        Paint(Color.MAGENTA, 50f),
-        Paint(Color.CYAN, 50f),
-        Paint(Color.YELLOW, 50f)
-    )
-
     private lateinit var gameBoard: MinesweeperBoard
     private lateinit var gameView: SurfaceView
     private lateinit var labelNbFlagsRemaining: TextView
@@ -105,9 +93,9 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun getIcons() {
-        bombIcon = getIcon(R.drawable.bombicon)
-        flagIcon = getIcon(R.drawable.flagicon)
-        tileIcon = getIcon(R.drawable.emptytile)
+        bombIcon = getIcon(Settings.theme[R.drawable.bombicon])
+        flagIcon = getIcon(Settings.theme[R.drawable.flagicon])
+        tileIcon = getIcon(Settings.theme[R.drawable.emptytile])
     }
 
     private fun getIcon(@DrawableRes resource: Int) =
@@ -141,10 +129,10 @@ class GameActivity : AppCompatActivity() {
 
         // --------- ONCLICK EVENT TO SWITCH BETWEEN FLAG AND REVEAL MODE ---------
         findViewById<ImageView>(R.id.switchmode).apply {
-            setBackgroundResource(R.drawable.pickaxeicon)
+            setBackgroundResource(Settings.theme[mode.icon])
             setOnClickListener {
                 mode = mode.next
-                setBackgroundResource(mode.icon)
+                setBackgroundResource(Settings.theme[mode.icon])
             }
         }
 
@@ -271,7 +259,7 @@ class GameActivity : AppCompatActivity() {
                         res,
                         p.x * cellSize + textOffset.x.toFloat(),
                         p.y * cellSize + textOffset.y.toFloat(),
-                        paints[res.toInt() - 1]
+                        Paint(Settings.colors[res.toInt() - 1], 50f)
                     )
                 }
             }

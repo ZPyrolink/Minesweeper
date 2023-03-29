@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <com.google.android.material.slider.Slider
+            android:id="@+id/red_slider"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:stepSize="1"
+            android:valueFrom="0"
+            android:valueTo="255"
+            app:thumbColor="@color/dark_red"
+            app:tickColor="@color/red"
+            app:trackColor="@color/light_red" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight=".25"
+            android:gravity="center"
+            android:text="@string/red"
+            android:textColor="@color/red" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <com.google.android.material.slider.Slider
+            android:id="@+id/green_slider"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:stepSize="1"
+            android:valueFrom="0"
+            android:valueTo="255"
+            app:thumbColor="@color/dark_green"
+            app:tickColor="@color/green"
+            app:trackColor="@color/light_green" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight=".25"
+            android:gravity="center"
+            android:text="@string/green"
+            android:textColor="@color/green" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <com.google.android.material.slider.Slider
+            android:id="@+id/blue_slider"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:stepSize="1"
+            android:valueFrom="0"
+            android:valueTo="255"
+            app:thumbColor="@color/dark_blue"
+            app:tickColor="@color/blue"
+            app:trackColor="@color/light_blue" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight=".25"
+            android:gravity="center"
+            android:text="@string/blue"
+            android:textColor="@color/blue" />
+    </LinearLayout>
+
+    <View
+        android:id="@+id/color_preview"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_gravity="center_horizontal"
+        android:orientation="horizontal" />
+
+</LinearLayout>

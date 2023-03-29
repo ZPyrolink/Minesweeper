@@ -4,6 +4,7 @@
     package="com.devinou971.minesweeperandroid">
 
     <application
+        android:name=".Minesweeper"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -23,7 +24,8 @@
         <activity
             android:name=".GameActivity"
             android:exported="false"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            tools:ignore="LockedOrientationActivity" />
         <activity
             android:name=".MenuActivity"
             android:exported="false" />
