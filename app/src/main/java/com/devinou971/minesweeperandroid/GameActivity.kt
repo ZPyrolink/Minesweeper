@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.view.MotionEvent
 import android.view.SurfaceView
 import android.view.View
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -38,8 +39,14 @@ class GameActivity : AppCompatActivity() {
     private lateinit var gameView: SurfaceView
     private lateinit var labelNbFlagsRemaining: TextView
 
-    private lateinit var playerWin: ConstraintLayout
-    private lateinit var playerLose: ConstraintLayout
+    //#region Bind
+
+    private lateinit var gameOverPopup: ConstraintLayout
+    private lateinit var gameOverText: TextView
+    private lateinit var anotherChance: Button
+    private lateinit var replay: Button
+
+    //#endregion
 
     private var nbBombs = 0
     private var nbRows = 0
@@ -66,14 +73,75 @@ class GameActivity : AppCompatActivity() {
     private lateinit var serviceIntent: Intent
     private var time: Double = 0.0
 
+    @SuppressLint("ClickableViewAccessibility")
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_game)
+
+        getExtras(intent)
+        getIcons()
+        bindViews()
+
+        gameBoard = MinesweeperBoard(nbRows, nbCols, nbBombs)
+
+        // --------- CREATE ON CLICK EVENT FOR CANVAS ---------
+        gameView.setOnTouchListener { _, motionEvent ->
+            if (motionEvent.action == MotionEvent.ACTION_UP)
+                gridClickedEvent(PointF(motionEvent))
+
+            return@setOnTouchListener true
+        }
+
+        gameView.setZOrderOnTop(true)
+        gameView.holder.setFormat(PixelFormat.TRANSPARENT)
+
+        // --------- ONCLICK EVENT FOR THE "REPLAY" BUTTON
+        setOnClickListeners(R.id.reloadBoard, R.id.replayButton) { replay() }
+        setOnClickListeners(R.id.returnMenuButton) { goToMenu() }
+
+        // --------- ONCLICK EVENT TO SWITCH BETWEEN FLAG AND REVEAL MODE ---------
+        findViewById<ImageView>(R.id.switchmode).apply {
+            setBackgroundResource(Settings.theme[mode.icon])
+            setOnClickListener {
+                mode = mode.next
+                setBackgroundResource(Settings.theme[mode.icon])
+            }
+        }
+
+        labelNbFlagsRemaining.text = gameBoard.nbFlags.toString()
+        setOnClickListeners(R.id.anotherChance) { revive() }
+
+        // --------- ONCE THE VIEW IS AVAILABLE, WE DRAW THE GRID ON IT ---------
+        gameView.viewTreeObserver.addOnWindowFocusChangeListener { if (!quit) drawGrid() }
+
+        serviceIntent = Intent(applicationContext, TimerService::class.java)
+        registerReceiver(updateTime, IntentFilter(ExtraUtils.TIMER_UPDATED.name))
+    }
+
     /**
      * FETCHING ALL THE VIEWS
      */
     private fun bindViews() {
         gameView = findViewById(R.id.gameView)
-        playerWin = findViewById(R.id.playerWin)
-        playerLose = findViewById(R.id.playerLose)
+        gameOverPopup = findViewById(R.id.gameOverPopup)
+        gameOverText = findViewById(R.id.gameOverText)
+        anotherChance = findViewById(R.id.anotherChance)
+        replay = findViewById(R.id.replayButton)
         labelNbFlagsRemaining = findViewById(R.id.nbFlagsRemaining)
+    }
+
+    private fun setGameOverView(win: Boolean) {
+        gameOverPopup.setVisible()
+
+        if (win) {
+            gameOverText.text = getString(R.string.you_won_string)
+            anotherChance.setGone()
+            replay.layoutParams.height = 75.applyDim(CpxUnit.DIP)
+        } else {
+            gameOverText.text = getString(R.string.gameover)
+            anotherChance.setVisible()
+            replay.layoutParams.height = 61.applyDim(CpxUnit.DIP)
+        }
     }
 
     /**
@@ -101,63 +169,18 @@ class GameActivity : AppCompatActivity() {
     private fun getIcon(@DrawableRes resource: Int) =
         BitmapFactory.decodeResource(resources, resource).scale(cellSize, cellSize, false)
 
-    @SuppressLint("ClickableViewAccessibility")
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_game)
-
-        getExtras(intent)
-        getIcons()
-        bindViews()
-
-        gameBoard = MinesweeperBoard(nbRows, nbCols, nbBombs)
-
-        // --------- CREATE ON CLICK EVENT FOR CANVAS ---------
-        gameView.setOnTouchListener { _, motionEvent ->
-            if (motionEvent.action == MotionEvent.ACTION_UP)
-                gridClickedEvent(PointF(motionEvent))
-
-            return@setOnTouchListener true
-        }
-
-        gameView.setZOrderOnTop(true)
-        gameView.holder.setFormat(PixelFormat.TRANSPARENT)
-
-        // --------- ONCLICK EVENT FOR THE "REPLAY" BUTTON
-        setOnClickListeners(R.id.reloadBoard, R.id.replayButton, R.id.replayButton2) { replay() }
-        setOnClickListeners(R.id.returnMenuButton, R.id.returnMenuButton2) { goToMenu() }
-
-        // --------- ONCLICK EVENT TO SWITCH BETWEEN FLAG AND REVEAL MODE ---------
-        findViewById<ImageView>(R.id.switchmode).apply {
-            setBackgroundResource(Settings.theme[mode.icon])
-            setOnClickListener {
-                mode = mode.next
-                setBackgroundResource(Settings.theme[mode.icon])
-            }
-        }
-
-        labelNbFlagsRemaining.text = gameBoard.nbFlags.toString()
-        setOnClickListeners(R.id.anotherChance) { revive() }
-
-        // --------- ONCE THE VIEW IS AVAILABLE, WE DRAW THE GRID ON IT ---------
-        gameView.viewTreeObserver.addOnWindowFocusChangeListener { if (!quit) drawGrid() }
-
-        serviceIntent = Intent(applicationContext, TimerService::class.java)
-        registerReceiver(updateTime, IntentFilter(ExtraUtils.TIMER_UPDATED.name))
-    }
-
     private fun gridClickedEvent(position: PointF) {
         act(position, mode)
 
         when (mode) {
             Mode.REVEAL -> {
                 val toastText: String
-                val nextScreen: ConstraintLayout
+                val win: Boolean
 
                 when {
                     gameBoard.won() -> {
                         toastText = "You win GG!"
-                        nextScreen = playerWin
+                        win = true
 
                         Thread {
                             AppDatabase.getAppDataBase(this).gameDataDAO()
@@ -166,7 +189,7 @@ class GameActivity : AppCompatActivity() {
                     }
                     gameBoard.gameOver -> {
                         toastText = "Game Over"
-                        nextScreen = playerLose
+                        win = false
                     }
                     else -> return
                 }
@@ -175,7 +198,7 @@ class GameActivity : AppCompatActivity() {
 
                 Toast.makeText(this, toastText, Toast.LENGTH_LONG).show()
                 gameView.setGone()
-                nextScreen.setVisible()
+                setGameOverView(win)
             }
 
             Mode.FLAG -> labelNbFlagsRemaining.text = gameBoard.nbFlags.toString()
@@ -195,8 +218,7 @@ class GameActivity : AppCompatActivity() {
     }
 
     private fun setGameView() {
-        playerWin.setGone()
-        playerLose.setGone()
+        gameOverPopup.setGone()
         gameView.setVisible()
 
         labelNbFlagsRemaining.text = gameBoard.nbFlags.toString()
