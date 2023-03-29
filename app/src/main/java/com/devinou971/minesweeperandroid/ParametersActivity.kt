@@ -23,6 +23,7 @@ import com.devinou971.minesweeperandroid.storageclasses.AppDatabase
 
 class ParametersActivity : AppCompatActivity() {
     private lateinit var colorsList: RecyclerView
+    private lateinit var themeList: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,13 +34,13 @@ class ParametersActivity : AppCompatActivity() {
             adapter = ColorPickersAdapter(Settings.colors)
         }
 
-        findViewById<RecyclerView>(R.id.themes_list).apply {
-            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        fun clearBackgroundThemes() {
+            for (child in themeList.children)
+                child.background = null
+        }
 
-            fun clearBackgroundThemes() {
-                for (child in children)
-                    child.background = null
-            }
+        themeList = findViewById<RecyclerView>(R.id.themes_list).apply {
+            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
 
             adapter = ThemeAdapter(
                 Settings.Theme.values().map { theme ->
@@ -60,6 +61,9 @@ class ParametersActivity : AppCompatActivity() {
             Settings.reset(this)
             Settings.save(this)
             colorsList.adapter = ColorPickersAdapter(Settings.colors)
+            clearBackgroundThemes()
+            themeList.findViewHolderForAdapterPosition(Settings.theme.ordinal)!!.itemView
+                .setBackgroundColor(getColor(R.color.gainsboro))
 
             runOnUiThread {
                 ToastExt.showText(this, R.string.settings_cleared, Toast.LENGTH_SHORT)
