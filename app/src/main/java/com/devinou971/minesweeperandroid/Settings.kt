@@ -54,9 +54,15 @@ object Settings {
             mapOf(
                 D.bombicon to D.bombicon_minecraft,
                 D.flagicon to D.flagicon_minecraft,
-                D.pickaxeicon to D.pickaxeicon_minecraft,
-                D.bombicon to D.bombicon_minecraft
+                D.pickaxeicon to D.pickaxeicon_minecraft
             ), D.bombicon_minecraft
+        ),
+        PIXEL(
+            mapOf(
+                D.bombicon to D.bombicon_pixel,
+                D.flagicon to D.flagicon_pixel,
+                D.pickaxeicon to D.pickaxeicon_pixel
+            ), D.pickaxeicon_pixel
         );
 
         @DrawableRes
