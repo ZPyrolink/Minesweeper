@@ -1,6 +1,7 @@
 package com.devinou971.minesweeperandroid.classes
 
 import android.graphics.Point
+import android.util.Log
 import com.devinou971.minesweeperandroid.extensions.*
 
 class MinesweeperBoard(val nbRows: Int, val nbCols: Int, private val nbBombs: Int) {
@@ -91,7 +92,7 @@ class MinesweeperBoard(val nbRows: Int, val nbCols: Int, private val nbBombs: In
                 this[p].nbBombs = this[p].position.countNeighbors(bombs)
         }
 
-        print("xRayView:\n${xRayView()}")
+        Log.d("xRayView", xRayView())
     }
 
     fun xRayView() = grid.joinToString("\n") { line ->

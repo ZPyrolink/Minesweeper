@@ -81,8 +81,6 @@ class ColorPickersAdapter(private val array: IntArray) :
                     if (it == null)
                         return@doAfterTextChanged
 
-                    println(textColors)
-
                     setTextColor(
                         resources.getColor(
                             android.R.color.primary_text_dark,
