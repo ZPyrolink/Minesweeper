@@ -1,5 +1,6 @@
-package com.devinou971.minesweeperandroid.composables
+package com.devinou971.minesweeperandroid.composables.utils
 
+import androidx.annotation.ColorInt
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +19,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.devinou971.minesweeperandroid.ui.theme.MinesweeperAndroidTheme
 import com.devinou971.minesweeperandroid.utils.rememberMutableState
+
+@Composable
+fun RgbColorPicker(@ColorInt color: Int, onColorChanged: (Color) -> Unit) =
+    RgbColorPicker(color = Color(color), onColorChanged = onColorChanged)
 
 @Composable
 fun RgbColorPicker(color: Color, onColorChanged: (Color) -> Unit) = Column {
@@ -70,4 +75,10 @@ fun RgbColorPicker(color: Color, onColorChanged: (Color) -> Unit) = Column {
 @Composable
 private fun Preview() = MinesweeperAndroidTheme(true) {
     RgbColorPicker(Color.Cyan) {}
+}
+
+@Preview
+@Composable
+private fun PreviewHex() = MinesweeperAndroidTheme(true) {
+    RgbColorPicker(0xffff00) {}
 }
