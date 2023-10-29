@@ -1,7 +1,11 @@
 package com.devinou971.minesweeperandroid.classes
 
 import android.graphics.Point
-import com.devinou971.minesweeperandroid.extensions.*
+import com.devinou971.minesweeperandroid.extensions.Random
+import com.devinou971.minesweeperandroid.extensions.countNeighbors
+import com.devinou971.minesweeperandroid.extensions.nextPoint
+import com.devinou971.minesweeperandroid.extensions.nextTo
+import com.devinou971.minesweeperandroid.extensions.until
 
 class MinesweeperBoard(val nbRows: Int, val nbCols: Int, private val nbBombs: Int) {
     private val grid = Array(nbRows) { Array(nbCols) { Slot() } }
@@ -9,6 +13,9 @@ class MinesweeperBoard(val nbRows: Int, val nbCols: Int, private val nbBombs: In
         get() = grid.size
     val columns
         get() = grid[0].size
+
+    val points
+        get() = Point().until(rows, columns)
 
     var nbFlags = nbBombs
         private set

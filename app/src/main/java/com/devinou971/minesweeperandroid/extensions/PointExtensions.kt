@@ -15,6 +15,8 @@ fun Point.countNeighbors(l: MutableList<Point>): Int {
 
 operator fun Point.plus(other: Point) = Point(x + other.x, y + other.y)
 
+operator fun Point.times(factor: Int) = Point(x * factor, y * factor)
+
 fun Point.until(rows: Int, columns: Int) = object : Iterator<Point> {
     private lateinit var current: Point
 
