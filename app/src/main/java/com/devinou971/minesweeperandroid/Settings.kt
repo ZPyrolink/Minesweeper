@@ -11,9 +11,6 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.graphics.Color
 import androidx.core.content.edit
 import com.devinou971.minesweeperandroid.utils.get
-import com.devinou971.minesweeperandroid.utils.put
-import com.devinou971.minesweeperandroid.utils.putList
-import com.devinou971.minesweeperandroid.wrappers.ColorWrapper
 
 private typealias D = R.drawable
 
@@ -64,9 +61,9 @@ object Settings {
 
     fun save(context: Context) {
         context.getSharedPreferences("Settings", Context.MODE_PRIVATE).edit(true) {
-            putBoolean("init", true)
-            putList(::newColors, ColorWrapper.stringWrapper::to)
-            put(::theme)
+//            putBoolean("init", true)
+//            putList(::newColors, ColorWrapper.stringWrapper::to)
+//            put(::theme)
         }
     }
 

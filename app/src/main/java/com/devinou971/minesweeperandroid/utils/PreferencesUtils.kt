@@ -15,6 +15,9 @@ fun <V, T> SharedPreferences.getNullable(
 fun <T> SharedPreferences.get(ref: KMutableProperty0<T>, default: T): Unit =
     ref.set(get(ref.name, default))
 
+inline fun <reified T : Enum<T>> SharedPreferences.get(ref: KMutableProperty0<T>, default: T): Unit =
+    ref.set(get(ref.name, default))
+
 @Suppress("UNCHECKED_CAST")
 operator fun <T> SharedPreferences.get(
     key: String,
