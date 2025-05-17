@@ -4,6 +4,7 @@ plugins {
 
     alias(libs.plugins.android.app)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.compose)
 }
 
 android {
@@ -48,7 +49,6 @@ android {
 }
 
 dependencies {
-//    print(compose)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
