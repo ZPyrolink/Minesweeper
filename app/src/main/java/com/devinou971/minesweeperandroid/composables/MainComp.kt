@@ -21,7 +21,9 @@ import com.devinou971.minesweeperandroid.R
 import com.devinou971.minesweeperandroid.ui.theme.MinesweeperAndroidTheme
 
 @Composable
-fun Main() = Column(
+fun Main(
+//    navCtrl: NavController
+) = Column(
     Modifier.fillMaxSize(),
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.SpaceEvenly

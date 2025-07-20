@@ -1,19 +1,25 @@
 package com.devinou971.minesweeperandroid
 
-import android.content.Intent
 import android.os.Bundle
-import android.view.View
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
+import com.devinou971.minesweeperandroid.navigation.Screen
+import com.devinou971.minesweeperandroid.ui.theme.MinesweeperAndroidTheme
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContent {
+            MinesweeperAndroidTheme {
+                val ctrl = rememberNavController()
+
+                NavHost(
+                    navController = ctrl,
+                    graph = Screen.rememberNavGraph(ctrl)
+                )
+            }
+        }
     }
-
-    fun goToMenu(@Suppress("UNUSED_PARAMETER") view: View) {
-        startActivity(Intent(this, MenuActivity::class.java))
-    }
-
-
 }
