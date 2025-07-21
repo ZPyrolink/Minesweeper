@@ -6,9 +6,9 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraph
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.createGraph
 import androidx.navigation.toRoute
+import com.devinou971.minesweeperandroid.composables.MainComp
 import com.devinou971.minesweeperandroid.serializer.SerializableIntSize
 import com.devinou971.minesweeperandroid.utils.Difficulty
 import kotlinx.serialization.Serializable
@@ -38,9 +38,9 @@ sealed interface Screen {
 
     companion object {
         @Composable
-        fun rememberNavGraph(ctrl: NavController = rememberNavController()): NavGraph = remember {
+        fun rememberNavGraph(ctrl: NavController): NavGraph = remember {
             ctrl.createGraph(startDestination = Title) {
-                composable<Title> { TODO() }
+                composable<Title> { MainComp(ctrl) }
                 composable<DifficultyChooser> { TODO() }
                 composable<CustomGameSettings> { TODO() }
                 composable<Game>(
