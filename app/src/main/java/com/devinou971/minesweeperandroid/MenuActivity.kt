@@ -65,7 +65,8 @@ class MenuActivity : AppCompatActivity() {
         val cellSize = availableWidth / nbCols
         val nbRows = availableHeight / cellSize
 
-        startActivity(when (viewId) {
+        startActivity(
+            when (viewId) {
             R.id.customLevelButon -> Intent(this, CustomGameActivity::class.java).apply {
                 putExtra(ExtraUtils.NB_COLS, nbCols)
                 putExtra(ExtraUtils.NB_ROWS, nbRows)
@@ -83,7 +84,7 @@ class MenuActivity : AppCompatActivity() {
                     putExtras(
                         nbRows,
                         nbCols,
-                        difficulty.nbBombs(nbRows, nbCols),
+                        difficulty.nbBombs(nbCols, nbRows),
                         cellSize,
                         difficulty
                     )

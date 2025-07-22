@@ -6,10 +6,10 @@ enum class Difficulty(val id: Int, private val bombPercentage: Double) {
     HARD(2, .38),
     CUSTOM(-1, .0), ;
 
-    fun nbBombs(rows: Int, columns: Int) = (rows * columns * bombPercentage).toInt()
+    fun nbBombs(columns: Int, rows: Int) = (rows * columns * bombPercentage).toInt()
 
     companion object {
-        fun nbBombs(rows: Int, columns: Int, percentage: Float) =
+        fun nbBombs(columns: Int, rows: Int, percentage: Float) =
             (rows * columns * percentage).toInt()
     }
 }

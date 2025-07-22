@@ -59,7 +59,8 @@ fun MenuComp() = Box(modifier = Modifier.fillMaxSize()) {
             val cellSize = availableWidth / nbCols
             val nbRows = availableHeight / cellSize
 
-            ctx.startActivity(when (d) {
+            ctx.startActivity(
+                when (d) {
                 Difficulty.CUSTOM -> Intent(ctx, CustomGameActivity::class.java).apply {
                     putExtra(ExtraUtils.NB_COLS, nbCols)
                     putExtra(ExtraUtils.NB_ROWS, nbRows)
@@ -70,7 +71,7 @@ fun MenuComp() = Box(modifier = Modifier.fillMaxSize()) {
                         putExtras(
                             nbRows,
                             nbCols,
-                            d.nbBombs(nbRows, nbCols),
+                            d.nbBombs(nbCols, nbRows),
                             cellSize
                         )
                     }
@@ -111,9 +112,11 @@ fun LevelBtn(
         }
     }
 
-    Text(text = when (hightscore) {
-        (-1).seconds -> stringResource(id = R.string.no_highscore_yet)
-        null -> "Loading..."
-        else -> hightscore.toString()
-    })
+    Text(
+        text = when (hightscore) {
+            (-1).seconds -> stringResource(id = R.string.no_highscore_yet)
+            null -> "Loading..."
+            else -> hightscore.toString()
+        }
+    )
 }

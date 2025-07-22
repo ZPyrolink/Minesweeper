@@ -1,10 +1,13 @@
 package com.devinou971.minesweeperandroid
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
-import com.devinou971.minesweeperandroid.utils.*
+import androidx.appcompat.app.AppCompatActivity
+import com.devinou971.minesweeperandroid.utils.Difficulty
+import com.devinou971.minesweeperandroid.utils.ExtraUtils
+import com.devinou971.minesweeperandroid.utils.getExtra
+import com.devinou971.minesweeperandroid.utils.putExtras
 import com.google.android.material.slider.Slider
 
 class CustomGameActivity : AppCompatActivity() {
@@ -35,7 +38,7 @@ class CustomGameActivity : AppCompatActivity() {
 
         val nbCols = colsSlider.value.toInt()
         val nbRows = rowsSlider.value.toInt()
-        val nbBombs = Difficulty.nbBombs(nbRows, nbCols, (bombsSlider.value / 100))
+        val nbBombs = Difficulty.nbBombs(nbCols, nbRows, bombsSlider.value / 100)
 
         val availableHeight = (window.decorView.height * 0.80).toInt()
         val availableWidth = window.decorView.width
