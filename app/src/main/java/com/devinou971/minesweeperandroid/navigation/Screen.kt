@@ -8,6 +8,9 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.createGraph
 import androidx.navigation.toRoute
+import com.devinou971.minesweeperandroid.classes.MinesweeperBoardJC
+import com.devinou971.minesweeperandroid.composables.CustomGameComp
+import com.devinou971.minesweeperandroid.composables.GameComp
 import com.devinou971.minesweeperandroid.composables.MainComp
 import com.devinou971.minesweeperandroid.composables.MenuComp
 import com.devinou971.minesweeperandroid.serializer.SerializableIntSize
@@ -43,14 +46,25 @@ sealed interface Screen {
             ctrl.createGraph(startDestination = Title) {
                 composable<Title> { MainComp(ctrl) }
                 composable<DifficultyChooser> { MenuComp(ctrl) }
-                composable<CustomGameSettings> { TODO() }
+                composable<CustomGameSettings>(
+                    typeMap = mapOf(
+                        typeOf<SerializableIntSize>() to CustomNavType.IntSizeT
+                    )
+                ) {
+                    val route = it.toRoute<CustomGameSettings>()
+                    CustomGameComp(route.size, ctrl)
+                }
                 composable<Game>(
                     typeMap = mapOf(
                         typeOf<Difficulty>() to NavType.EnumType(Difficulty::class.java),
                         typeOf<SerializableIntSize>() to CustomNavType.IntSizeT
                     )
                 ) {
-                    val arguments = it.toRoute<Game>()
+                    val route = it.toRoute<Game>()
+                    GameComp(
+                        MinesweeperBoardJC(route.size.height, route.size.width, route.nbBombs),
+                        route.cellSize
+                    )
                 }
                 composable<Parameters> { TODO() }
             }
