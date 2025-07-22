@@ -1,10 +1,10 @@
 package com.devinou971.minesweeperandroid.utils
 
 enum class Difficulty(val id: Int, private val bombPercentage: Double) {
-    CUSTOM(-1, .0),
     EASY(0, .15),
     NORMAL(1, .22),
-    HARD(2, .38);
+    HARD(2, .38),
+    CUSTOM(-1, .0), ;
 
     fun nbBombs(rows: Int, columns: Int) = (rows * columns * bombPercentage).toInt()
 
