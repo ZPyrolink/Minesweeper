@@ -1,6 +1,6 @@
 package com.devinou971.minesweeperandroid.composables
 
-import android.content.Intent
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -19,16 +20,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
-import androidx.core.content.ContextCompat.startActivity
-import com.devinou971.minesweeperandroid.CustomGameActivity
-import com.devinou971.minesweeperandroid.GameActivity
-import com.devinou971.minesweeperandroid.ParametersActivity
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.devinou971.minesweeperandroid.R
+import com.devinou971.minesweeperandroid.navigation.Screen
+import com.devinou971.minesweeperandroid.serializer.SerializableIntSize
 import com.devinou971.minesweeperandroid.storageclasses.AppDatabase
+import com.devinou971.minesweeperandroid.ui.theme.MinesweeperAndroidTheme
 import com.devinou971.minesweeperandroid.utils.Difficulty
-import com.devinou971.minesweeperandroid.utils.ExtraUtils
-import com.devinou971.minesweeperandroid.utils.putExtra
-import com.devinou971.minesweeperandroid.utils.putExtras
 import com.devinou971.minesweeperandroid.utils.rememberMutableState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -36,12 +38,12 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 @Composable
-fun MenuComp() = Box(modifier = Modifier.fillMaxSize()) {
-    val ctx = LocalContext.current
-
+fun MenuComp(
+    navCtrl: NavController
+) = Box(modifier = Modifier.fillMaxSize()) {
     IconButton(
         modifier = Modifier.align(Alignment.TopEnd),
-        onClick = { startActivity(ctx, Intent(ctx, ParametersActivity::class.java), null) }
+        onClick = { navCtrl.navigate(Screen.Parameters) }
     ) {
         Icon(
             imageVector = Icons.Default.Settings,
@@ -49,7 +51,11 @@ fun MenuComp() = Box(modifier = Modifier.fillMaxSize()) {
         )
     }
 
-    Column {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(50.dp, Alignment.CenterVertically),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         val view = LocalView.current
 
         fun startGame(d: Difficulty) {
@@ -59,26 +65,21 @@ fun MenuComp() = Box(modifier = Modifier.fillMaxSize()) {
             val cellSize = availableWidth / nbCols
             val nbRows = availableHeight / cellSize
 
-            ctx.startActivity(
-                when (d) {
-                Difficulty.CUSTOM -> Intent(ctx, CustomGameActivity::class.java).apply {
-                    putExtra(ExtraUtils.NB_COLS, nbCols)
-                    putExtra(ExtraUtils.NB_ROWS, nbRows)
-                }
+            val size = SerializableIntSize(nbCols, nbRows)
 
-                Difficulty.EASY, Difficulty.NORMAL, Difficulty.HARD ->
-                    Intent(ctx, GameActivity::class.java).apply {
-                        putExtras(
-                            nbRows,
-                            nbCols,
-                            d.nbBombs(nbCols, nbRows),
-                            cellSize
-                        )
-                    }
-            })
+            if (d == Difficulty.CUSTOM)
+                navCtrl.navigate(Screen.CustomGameSettings(size))
+            else
+                navCtrl.navigate(
+                    Screen.Game(
+                        size,
+                        cellSize,
+                        d.nbBombs(nbCols, nbRows)
+                    )
+                )
         }
 
-        for (d in Difficulty.values())
+        for (d in Difficulty.entries)
             LevelBtn(d, ::startGame)
     }
 }
@@ -87,7 +88,10 @@ fun MenuComp() = Box(modifier = Modifier.fillMaxSize()) {
 fun LevelBtn(
     difficulty: Difficulty,
     onClick: (Difficulty) -> Unit
-) = Column {
+) = Column(
+    horizontalAlignment = Alignment.CenterHorizontally,
+    verticalArrangement = Arrangement.spacedBy(5.dp)
+) {
     Button(onClick = { onClick(difficulty) }) {
         Text(text = difficulty.name)
     }
@@ -119,4 +123,12 @@ fun LevelBtn(
             else -> hightscore.toString()
         }
     )
+}
+
+@PreviewLightDark
+@Composable
+private fun Preview() = MinesweeperAndroidTheme {
+    Surface {
+        MenuComp(rememberNavController())
+    }
 }
