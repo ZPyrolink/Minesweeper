@@ -24,6 +24,7 @@ import com.devinou971.minesweeperandroid.navigation.Screen
 import com.devinou971.minesweeperandroid.serializer.SerializableIntSize
 import com.devinou971.minesweeperandroid.ui.theme.MinesweeperAndroidTheme
 import com.devinou971.minesweeperandroid.utils.Difficulty
+import com.devinou971.minesweeperandroid.utils.LocalDpSize
 import com.devinou971.minesweeperandroid.utils.rememberMutableState
 
 @Composable
@@ -62,11 +63,11 @@ fun CustomGameComp(
         range = 12f..80f
     ) { bombPercentage = it }
 
-    val view = LocalView.current
+    val dpSize = LocalDpSize
 
     Button(onClick = {
-        val availableHeight = (view.height * 0.80).toInt()
-        val availableWidth = view.width
+        val availableHeight = (dpSize.height.value * 0.80).toInt()
+        val availableWidth = dpSize.width.value
 
         val cellSize = if (availableWidth / nbCols <= availableHeight / nbRows)
             availableWidth / nbCols else

@@ -18,9 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -31,6 +29,7 @@ import com.devinou971.minesweeperandroid.serializer.SerializableIntSize
 import com.devinou971.minesweeperandroid.storageclasses.AppDatabase
 import com.devinou971.minesweeperandroid.ui.theme.MinesweeperAndroidTheme
 import com.devinou971.minesweeperandroid.utils.Difficulty
+import com.devinou971.minesweeperandroid.utils.LocalDpSize
 import com.devinou971.minesweeperandroid.utils.rememberMutableState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -56,14 +55,14 @@ fun MenuComp(
         verticalArrangement = Arrangement.spacedBy(50.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val view = LocalView.current
+        val dpSize = LocalDpSize
 
         fun startGame(d: Difficulty) {
-            val availableHeight = (view.height * 0.80).toInt()
-            val availableWidth = view.width
+            val availableHeight = (dpSize.height.value * 0.80).toInt()
+            val availableWidth = dpSize.width.value
             val nbCols = 10
             val cellSize = availableWidth / nbCols
-            val nbRows = availableHeight / cellSize
+            val nbRows = (availableHeight / cellSize).toInt()
 
             val size = SerializableIntSize(nbCols, nbRows)
 
@@ -73,7 +72,7 @@ fun MenuComp(
                 navCtrl.navigate(
                     Screen.Game(
                         size,
-                        cellSize,
+                        cellSize.toInt(),
                         d.nbBombs(nbCols, nbRows)
                     )
                 )
