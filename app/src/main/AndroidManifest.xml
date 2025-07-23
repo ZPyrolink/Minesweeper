@@ -18,16 +18,10 @@
             android:name=".ParametersActivity"
             android:exported="false" />
         <activity
-            android:name=".CustomGameActivity"
-            android:exported="false" />
-        <activity
             android:name=".GameActivity"
             android:exported="false"
             android:screenOrientation="portrait"
             tools:ignore="LockedOrientationActivity" />
-        <activity
-            android:name=".MenuActivity"
-            android:exported="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true">
