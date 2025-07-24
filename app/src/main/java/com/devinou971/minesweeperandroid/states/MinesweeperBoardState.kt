@@ -1,13 +1,11 @@
-package com.devinou971.minesweeperandroid.classes
+package com.devinou971.minesweeperandroid.states
 
 import android.graphics.Point
 import android.util.Log
 import androidx.annotation.DrawableRes
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.toMutableStateList
 import com.devinou971.minesweeperandroid.R
 import com.devinou971.minesweeperandroid.extensions.countNeighbors
 import com.devinou971.minesweeperandroid.extensions.nextPoint
@@ -16,7 +14,7 @@ import com.devinou971.minesweeperandroid.extensions.until
 import com.devinou971.minesweeperandroid.serializer.SerializableIntSize
 import kotlin.random.Random
 
-class MinesweeperBoardJC(
+class MinesweeperBoardState(
     private val size: SerializableIntSize,
     private val nbBombs: Int
 ) {
@@ -41,19 +39,19 @@ class MinesweeperBoardJC(
         mode = mode.next
     }
 
-    private var grid: List<List<SlotJC>>? by mutableStateOf(null)
+    private var grid: List<List<SlotState>>? by mutableStateOf(null)
 
     val points get() = Point().until(nbRows, nbCols)
 
     var nbFlags = nbBombs
         private set
 
-    var gameOver = false
+    var gameOver by mutableStateOf(false)
         private set
     val isFirstTouch: Boolean get() = grid == null
 
-    operator fun get(row: Int, columns: Int): SlotJC =
-        grid?.get(row)?.get(columns) ?: SlotJC.Null(Point(columns, row))
+    operator fun get(row: Int, columns: Int): SlotState =
+        grid?.get(row)?.get(columns) ?: SlotState.Null(Point(columns, row))
 
     operator fun get(co: Point) = this[co.y, co.x]
 
@@ -79,16 +77,16 @@ class MinesweeperBoardJC(
             List(nbCols) { c ->
                 val point = Point(c, r)
                 if (point in bombs)
-                    SlotJC.Bomb(point)
+                    SlotState.Bomb(point)
                 else
-                    SlotJC.Number(point, point.countNeighbors(bombs))
+                    SlotState.Number(point, point.countNeighbors(bombs))
             }
         }
 
         Log.i("xRayView", xRayView())
     }
 
-    fun reveal(position: Point) {
+    fun slotClick(position: Point) {
         if (gameOver)
             return
 
@@ -96,37 +94,38 @@ class MinesweeperBoardJC(
             generate(position)
 
         val slot = get(position)
+        when (mode) {
+            Mode.REVEAL -> reveal(slot)
+            Mode.FLAG -> switchFlag(slot)
+        }
+    }
+
+    private fun reveal(slot: SlotState) {
         when {
-            slot.flagged -> {}
-            slot is SlotJC.Bomb -> {
+            slot.flagged -> return
+            slot is SlotState.Bomb -> {
                 gameOver = true
                 slot.reveal()
             }
 
-            slot is SlotJC.Number -> {
+            slot is SlotState.Number -> {
                 Log.d("Reveal", "Revealing ${slot.position}")
                 slot.reveal()
+
                 if (slot.nbBombs != 0)
                     return
 
                 for (neighbor in slot.getUnseenNeighbors(grid!!)) {
-                    if (neighbor is SlotJC.Bomb || neighbor.flagged || neighbor.revealed) {
-                        Log.d("Reveal", "Ignoring ${neighbor.position}")
+                    if (neighbor is SlotState.Bomb || neighbor.flagged || neighbor.revealed)
                         continue
-                    }
 
-                    reveal(neighbor.position)
+                    reveal(neighbor)
                 }
             }
         }
     }
 
-    override fun toString() =
-        grid?.joinToString("\n") { it.joinToString(" ") } ?: "Not generated"
-
-    fun switchFlag(position: Point): Boolean {
-        val slot = this[position]
-
+    private fun switchFlag(slot: SlotState): Boolean {
         if (!slot.revealed) {
             if (slot.flagged)
                 nbFlags++
@@ -139,17 +138,20 @@ class MinesweeperBoardJC(
         return slot.flagged
     }
 
+    override fun toString() =
+        grid?.joinToString("\n") { it.joinToString(" ") } ?: "Not generated"
+
     val won: Boolean
         get() = grid?.asSequence()
             ?.flatMap { it.asSequence() }
-            ?.all { slot -> slot.revealed || slot is SlotJC.Bomb }
+            ?.all { slot -> slot.revealed || slot is SlotState.Bomb }
             ?: false
 
     fun revive() {
         gameOver = false
         grid?.asSequence()
             ?.flatMap { it.asSequence() }
-            ?.filter { slot -> slot is SlotJC.Bomb && slot.revealed }
+            ?.filter { slot -> slot is SlotState.Bomb && slot.revealed }
             ?.forEach { it.hide() }
     }
 }

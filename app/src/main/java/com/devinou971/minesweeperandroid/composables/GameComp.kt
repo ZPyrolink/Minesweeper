@@ -1,6 +1,7 @@
 package com.devinou971.minesweeperandroid.composables
 
 import android.graphics.Point
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,23 +16,26 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusModifier
+import androidx.compose.ui.modifier.modifierLocalProvider
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.devinou971.minesweeperandroid.R
-import com.devinou971.minesweeperandroid.classes.MinesweeperBoardJC
+import androidx.compose.ui.window.Dialog
+import com.devinou971.minesweeperandroid.states.MinesweeperBoardState
+import com.devinou971.minesweeperandroid.serializer.SerializableIntSize
 import com.devinou971.minesweeperandroid.ui.theme.MinesweeperAndroidTheme
 
 @Composable
 fun GameComp(
-    board: MinesweeperBoardJC,
+    board: MinesweeperBoardState,
     cellSize: Int
 ) = Column(
     modifier = Modifier.fillMaxSize(),
@@ -51,10 +55,14 @@ fun GameComp(
 
         Text(text = "00:00")
         Box {
-            Image(
-                painter = painterResource(id = R.drawable.tile),
-                contentDescription = stringResource(id = R.string.change_mode_image)
-            )
+            IconButton(
+                onClick = board::changeMode
+            ) {
+                Image(
+                    painter = painterResource(board.mode.icon),
+                    contentDescription = board.mode.name
+                )
+            }
         }
     }
 
@@ -63,7 +71,10 @@ fun GameComp(
             columns = GridCells.Adaptive(cellSize.dp)
         ) {
             items(board.points.asSequence().toList()) {
-                board[it].Render(cellSize, board)
+                SlotComp(
+                    board[it],
+                    size = cellSize
+                ) { board.slotClick(it) }
             }
         }
     }
@@ -76,7 +87,7 @@ private const val nbC = 10
 @Composable
 private fun Preview() = MinesweeperAndroidTheme(true) {
     Surface {
-        val game = MinesweeperBoardJC(nbC, nbC, 8)
+        val game = MinesweeperBoardState(SerializableIntSize(nbC, nbC), 8)
         GameComp(
             board = game,
             cellSize = width / nbC
@@ -88,7 +99,8 @@ private fun Preview() = MinesweeperAndroidTheme(true) {
 @Composable
 private fun PreviewGenerated() = MinesweeperAndroidTheme(true) {
     Surface {
-        val game = MinesweeperBoardJC(nbC, nbC, 8).apply { reveal(Point()) }
+        val game = MinesweeperBoardState(SerializableIntSize(nbC, nbC), 8)
+            .apply { slotClick(Point()) }
 
         GameComp(
             board = game,

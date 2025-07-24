@@ -8,11 +8,12 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.createGraph
 import androidx.navigation.toRoute
-import com.devinou971.minesweeperandroid.classes.MinesweeperBoardJC
+import com.devinou971.minesweeperandroid.states.MinesweeperBoardState
 import com.devinou971.minesweeperandroid.composables.CustomGameComp
 import com.devinou971.minesweeperandroid.composables.GameComp
 import com.devinou971.minesweeperandroid.composables.MainComp
 import com.devinou971.minesweeperandroid.composables.MenuComp
+import com.devinou971.minesweeperandroid.composables.ParametersComp
 import com.devinou971.minesweeperandroid.serializer.SerializableIntSize
 import com.devinou971.minesweeperandroid.utils.Difficulty
 import kotlinx.serialization.Serializable
@@ -62,7 +63,7 @@ sealed interface Screen {
                 ) {
                     val route = it.toRoute<Game>()
                     GameComp(
-                        MinesweeperBoardJC(route.size.height, route.size.width, route.nbBombs),
+                        MinesweeperBoardState(route.size, route.nbBombs),
                         route.cellSize
                     )
                 }

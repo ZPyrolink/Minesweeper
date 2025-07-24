@@ -18,5 +18,7 @@ value class SerializableIntSize(val packedValue: Long) {
     @Stable
     inline val height: Int
         get() = unpackInt2(packedValue)
+
+    override fun toString(): String = "$width X $height"
 }
 
