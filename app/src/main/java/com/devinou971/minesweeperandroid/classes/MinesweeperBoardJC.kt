@@ -3,21 +3,21 @@ package com.devinou971.minesweeperandroid.classes
 import android.graphics.Point
 import android.util.Log
 import androidx.annotation.DrawableRes
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
 import com.devinou971.minesweeperandroid.R
 import com.devinou971.minesweeperandroid.extensions.countNeighbors
 import com.devinou971.minesweeperandroid.extensions.nextPoint
 import com.devinou971.minesweeperandroid.extensions.nextTo
 import com.devinou971.minesweeperandroid.extensions.until
+import com.devinou971.minesweeperandroid.serializer.SerializableIntSize
 import kotlin.random.Random
 
 class MinesweeperBoardJC(
-    val nbRows: Int,
-    val nbCols: Int,
+    private val size: SerializableIntSize,
     private val nbBombs: Int
 ) {
     enum class Mode(@DrawableRes val icon: Int) {
@@ -31,10 +31,17 @@ class MinesweeperBoardJC(
             }
     }
 
+    val nbCols get() = size.width
+    val nbRows get() = size.height
+
     var mode: Mode by mutableStateOf(Mode.REVEAL)
         private set
 
-    private var grid: SnapshotStateList<SnapshotStateList<SlotJC>>? = null
+    fun changeMode() {
+        mode = mode.next
+    }
+
+    private var grid: List<List<SlotJC>>? by mutableStateOf(null)
 
     val points get() = Point().until(nbRows, nbCols)
 
@@ -45,7 +52,8 @@ class MinesweeperBoardJC(
         private set
     val isFirstTouch: Boolean get() = grid == null
 
-    operator fun get(row: Int, columns: Int): SlotJC = grid?.get(row)?.get(columns) ?: SlotJC.Null
+    operator fun get(row: Int, columns: Int): SlotJC =
+        grid?.get(row)?.get(columns) ?: SlotJC.Null(Point(columns, row))
 
     operator fun get(co: Point) = this[co.y, co.x]
 
@@ -74,8 +82,8 @@ class MinesweeperBoardJC(
                     SlotJC.Bomb(point)
                 else
                     SlotJC.Number(point, point.countNeighbors(bombs))
-            }.toMutableStateList()
-        }.toMutableStateList()
+            }
+        }
 
         Log.i("xRayView", xRayView())
     }
@@ -96,14 +104,14 @@ class MinesweeperBoardJC(
             }
 
             slot is SlotJC.Number -> {
-                Log.d("Generation", "Revealing ${slot.position}")
+                Log.d("Reveal", "Revealing ${slot.position}")
                 slot.reveal()
                 if (slot.nbBombs != 0)
                     return
 
                 for (neighbor in slot.getUnseenNeighbors(grid!!)) {
                     if (neighbor is SlotJC.Bomb || neighbor.flagged || neighbor.revealed) {
-                        Log.d("Generation", "Ignoring ${neighbor.position}")
+                        Log.d("Reveal", "Ignoring ${neighbor.position}")
                         continue
                     }
 
