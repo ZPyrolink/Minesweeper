@@ -1,4 +1,4 @@
-package com.devinou971.minesweeperandroid.components
+package com.devinou971.minesweeperandroid.composables
 
 import android.widget.Toast
 import androidx.compose.foundation.Image
@@ -76,7 +76,7 @@ fun ParametersComp() = Column(
         fontSize = 25.sp
     )
 
-    ThemeList(themes = Settings.Theme.values().asList())
+    ThemeList(themes = Settings.Theme.entries)
 
     Spacer(modifier = Modifier.weight(1f))
 

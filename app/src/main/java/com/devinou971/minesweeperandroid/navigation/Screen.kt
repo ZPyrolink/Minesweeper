@@ -66,7 +66,7 @@ sealed interface Screen {
                         route.cellSize
                     )
                 }
-                composable<Parameters> { TODO() }
+                composable<Parameters> { ParametersComp() }
             }
         }
     }
