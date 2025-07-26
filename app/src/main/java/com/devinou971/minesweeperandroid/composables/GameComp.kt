@@ -22,6 +22,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,6 +58,12 @@ fun GameComp(
     var board by remember { mutableStateOf(state) }
     val chrono = remember { ChronoVM() }
 
+    var navigateToHome by remember { mutableStateOf(false) }
+    LaunchedEffect(navigateToHome) {
+        if (navigateToHome)
+            navCtrl.navigate(Screen.DifficultyChooser)
+    }
+
     fun replay() {
         chrono.reset()
         board = board.createNew()
@@ -78,19 +85,17 @@ fun GameComp(
                     board.revive()
                 }
             } else null,
-            onReturnToMenu = {
-                navCtrl.popBackStack(Screen.DifficultyChooser, false)
-            }
+            onReturnToMenu = { navigateToHome = true }
         )
     }
 
-    if (board.gameOver)
+    if (board.gameOver && !navigateToHome)
         EndGame(
             text = R.string.gameover,
             true
         )
 
-    if (board.won)
+    if (board.won && !navigateToHome)
         EndGame(
             text = R.string.you_won_string,
             false
