@@ -64,6 +64,7 @@ sealed interface Screen {
                     val route = it.toRoute<Game>()
                     GameComp(
                         MinesweeperBoardState(route.size, route.nbBombs),
+                        rememberNavController(),
                         route.cellSize
                     )
                 }
