@@ -43,6 +43,7 @@ import com.devinou971.minesweeperandroid.Settings
 import com.devinou971.minesweeperandroid.navigation.Screen
 import com.devinou971.minesweeperandroid.serializer.SerializableIntSize
 import com.devinou971.minesweeperandroid.states.MinesweeperBoardState
+import com.devinou971.minesweeperandroid.states.SlotState
 import com.devinou971.minesweeperandroid.ui.theme.MinesweeperAndroidTheme
 import com.devinou971.minesweeperandroid.viewmodels.ChronoVM
 import kotlin.random.Random
@@ -61,20 +62,39 @@ fun GameComp(
         board = board.createNew()
     }
 
-    if (board.gameOver) {
+    @Composable
+    fun EndGame(
+        @StringRes text: Int,
+        anotherChance: Boolean
+    ) {
         chrono.stop()
 
         GameOverDialog(
+            text = text,
             onReplay = ::replay,
-            onAnotherChance = {
-                chrono.start()
-                board.revive()
-            },
+            onAnotherChance = if (anotherChance) {
+                {
+                    chrono.start()
+                    board.revive()
+                }
+            } else null,
             onReturnToMenu = {
                 navCtrl.popBackStack(Screen.DifficultyChooser, false)
             }
         )
     }
+
+    if (board.gameOver)
+        EndGame(
+            text = R.string.gameover,
+            true
+        )
+
+    if (board.won)
+        EndGame(
+            text = R.string.you_won_string,
+            false
+        )
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -140,9 +160,10 @@ fun GameComp(
 
 @Composable
 private fun GameOverDialog(
+    @StringRes text: Int,
     onReplay: () -> Unit,
-    onAnotherChance: () -> Unit,
-    onReturnToMenu: () -> Unit
+    onReturnToMenu: () -> Unit,
+    onAnotherChance: (() -> Unit)? = null
 ) = Dialog(
     onDismissRequest = {},
     properties = DialogProperties(
@@ -156,7 +177,7 @@ private fun GameOverDialog(
     ) {
         Text(
             modifier = Modifier.align(Alignment.Center),
-            text = stringResource(R.string.gameover),
+            text = stringResource(text),
             fontSize = 50.sp
         )
 
@@ -185,11 +206,14 @@ private fun GameOverDialog(
                 onClick = onReplay
             )
 
-            TextButton(
-                resource = R.string.another_chance,
-                fontSize = 25,
-                onClick = onAnotherChance
-            )
+            if (onAnotherChance != null) {
+                TextButton(
+                    resource = R.string.another_chance,
+                    fontSize = 25,
+                    onClick = onAnotherChance
+                )
+            }
+
 
             TextButton(
                 resource = R.string.return_to_menu,
@@ -256,6 +280,29 @@ private fun PreviewGO() = MinesweeperAndroidTheme(true) {
                             Random.nextInt(nbC)
                         )
                     )
+            }
+
+        GameComp(
+            state = game,
+            navCtrl = rememberNavController(),
+            cellSize = width / nbC
+        )
+    }
+}
+
+@Preview(widthDp = width)
+@Composable
+private fun PreviewWin() = MinesweeperAndroidTheme(true) {
+    Surface {
+        val game = MinesweeperBoardState(SerializableIntSize(nbC, nbC), 1)
+            .apply {
+                slotClick(Point())
+
+                for (point in points) {
+                    val slot = get(point)
+                    if (!slot.revealed && slot is SlotState.Number)
+                        slotClick(point)
+                }
             }
 
         GameComp(

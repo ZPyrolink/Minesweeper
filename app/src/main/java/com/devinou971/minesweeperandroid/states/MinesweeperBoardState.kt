@@ -142,17 +142,20 @@ class MinesweeperBoardState(
         grid?.joinToString("\n") { it.joinToString(" ") } ?: "Not generated"
 
     val won: Boolean
-        get() = grid?.asSequence()
-            ?.flatMap { it.asSequence() }
-            ?.all { slot -> slot.revealed || slot is SlotState.Bomb }
-            ?: false
+        get() = grid?.run {
+            asSequence()
+                .flatMap { it.asSequence() }
+                .all { slot -> slot.revealed || slot is SlotState.Bomb }
+        } ?: false
 
     fun revive() {
         gameOver = false
-        grid?.asSequence()
-            ?.flatMap { it.asSequence() }
-            ?.filter { slot -> slot is SlotState.Bomb && slot.revealed }
-            ?.forEach { it.hide() }
+        grid?.run {
+            asSequence()
+                .flatMap { it.asSequence() }
+                .filter { slot -> slot is SlotState.Bomb && slot.revealed }
+                .forEach { it.hide() }
+        }
     }
 
     fun createNew() = MinesweeperBoardState(size, nbBombs)
