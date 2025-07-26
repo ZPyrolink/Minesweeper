@@ -29,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -46,16 +47,17 @@ import com.devinou971.minesweeperandroid.serializer.SerializableIntSize
 import com.devinou971.minesweeperandroid.states.MinesweeperBoardState
 import com.devinou971.minesweeperandroid.states.SlotState
 import com.devinou971.minesweeperandroid.ui.theme.MinesweeperAndroidTheme
+import com.devinou971.minesweeperandroid.utils.Difficulty
 import com.devinou971.minesweeperandroid.viewmodels.ChronoVM
 import kotlin.random.Random
 
 @Composable
 fun GameComp(
-    state: MinesweeperBoardState,
+    initialState: MinesweeperBoardState,
     navCtrl: NavController,
     cellSize: Int
 ) {
-    var board by remember { mutableStateOf(state) }
+    var board by remember { mutableStateOf(initialState) }
     val chrono = remember { ChronoVM() }
 
     var navigateToHome by remember { mutableStateOf(false) }
@@ -95,11 +97,17 @@ fun GameComp(
             true
         )
 
-    if (board.won && !navigateToHome)
+    if (board.won && !navigateToHome) {
+        chrono.save(
+            LocalContext.current,
+            board.difficulty
+        )
+
         EndGame(
             text = R.string.you_won_string,
             false
         )
+    }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -234,13 +242,18 @@ private fun GameOverDialog(
 private const val width = 411
 private const val nbC = 10
 
+private fun generatePrevBoard() = MinesweeperBoardState(
+    SerializableIntSize(nbC, nbC),
+    8,
+    Difficulty.CUSTOM
+)
+
 @Preview(widthDp = width)
 @Composable
 private fun Preview() = MinesweeperAndroidTheme(true) {
     Surface {
-        val game = MinesweeperBoardState(SerializableIntSize(nbC, nbC), 8)
         GameComp(
-            state = game,
+            initialState = generatePrevBoard(),
             navCtrl = rememberNavController(),
             cellSize = width / nbC
         )
@@ -251,11 +264,11 @@ private fun Preview() = MinesweeperAndroidTheme(true) {
 @Composable
 private fun PreviewGenerated() = MinesweeperAndroidTheme(true) {
     Surface {
-        val game = MinesweeperBoardState(SerializableIntSize(nbC, nbC), 8)
+        val game = generatePrevBoard()
             .apply { slotClick(Point()) }
 
         GameComp(
-            state = game,
+            initialState = game,
             navCtrl = rememberNavController(),
             cellSize = width / nbC
         )
@@ -276,7 +289,7 @@ private fun PreviewGenerated() = MinesweeperAndroidTheme(true) {
 @Composable
 private fun PreviewGO() = MinesweeperAndroidTheme(true) {
     Surface {
-        val game = MinesweeperBoardState(SerializableIntSize(nbC, nbC), 20)
+        val game = generatePrevBoard()
             .apply {
                 while (!gameOver)
                     slotClick(
@@ -288,7 +301,7 @@ private fun PreviewGO() = MinesweeperAndroidTheme(true) {
             }
 
         GameComp(
-            state = game,
+            initialState = game,
             navCtrl = rememberNavController(),
             cellSize = width / nbC
         )
@@ -299,7 +312,7 @@ private fun PreviewGO() = MinesweeperAndroidTheme(true) {
 @Composable
 private fun PreviewWin() = MinesweeperAndroidTheme(true) {
     Surface {
-        val game = MinesweeperBoardState(SerializableIntSize(nbC, nbC), 1)
+        val game = generatePrevBoard()
             .apply {
                 slotClick(Point())
 
@@ -311,7 +324,7 @@ private fun PreviewWin() = MinesweeperAndroidTheme(true) {
             }
 
         GameComp(
-            state = game,
+            initialState = game,
             navCtrl = rememberNavController(),
             cellSize = width / nbC
         )

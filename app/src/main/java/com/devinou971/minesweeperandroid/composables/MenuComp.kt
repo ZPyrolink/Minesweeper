@@ -73,7 +73,8 @@ fun MenuComp(
                     Screen.Game(
                         size,
                         cellSize.toInt(),
-                        d.nbBombs(nbCols, nbRows)
+                        d.nbBombs(nbCols, nbRows),
+                        d
                     )
                 )
         }

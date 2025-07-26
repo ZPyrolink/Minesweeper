@@ -78,7 +78,8 @@ fun CustomGameComp(
             Screen.Game(
                 finalSize,
                 cellSize.toInt(),
-                Difficulty.nbBombs(finalSize.width, finalSize.height, bombPercentage)
+                Difficulty.nbBombs(finalSize.width, finalSize.height, bombPercentage),
+                Difficulty.CUSTOM
             )
         )
     }) {

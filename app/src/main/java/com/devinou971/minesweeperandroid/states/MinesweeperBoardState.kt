@@ -12,11 +12,13 @@ import com.devinou971.minesweeperandroid.extensions.nextPoint
 import com.devinou971.minesweeperandroid.extensions.nextTo
 import com.devinou971.minesweeperandroid.extensions.until
 import com.devinou971.minesweeperandroid.serializer.SerializableIntSize
+import com.devinou971.minesweeperandroid.utils.Difficulty
 import kotlin.random.Random
 
 class MinesweeperBoardState(
     private val size: SerializableIntSize,
-    private val nbBombs: Int
+    private val nbBombs: Int,
+    val difficulty: Difficulty
 ) {
     enum class Mode(@DrawableRes val icon: Int) {
         REVEAL(R.drawable.pickaxeicon),
@@ -158,5 +160,5 @@ class MinesweeperBoardState(
         }
     }
 
-    fun createNew() = MinesweeperBoardState(size, nbBombs)
+    fun createNew() = MinesweeperBoardState(size, nbBombs, difficulty)
 }

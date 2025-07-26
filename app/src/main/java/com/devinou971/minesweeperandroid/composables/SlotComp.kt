@@ -6,6 +6,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -47,7 +48,9 @@ sealed interface SlotComp<T : SlotState> {
                 return
 
             Text(
-                modifier = Modifier,
+                modifier = Modifier
+                    .size(size.dp)
+                    .wrapContentHeight(align = Alignment.CenterVertically),
                 text = state.nbBombs.toString(),
                 color = Settings.newColors[state.nbBombs - 1],
                 fontSize = 25.sp,
@@ -63,8 +66,6 @@ sealed interface SlotComp<T : SlotState> {
             size: Int,
             onClick: () -> Unit
         ) {
-            Log.i(TAG, "Rendering ${state.position}: f=${state.flagged} ; r=${state.revealed}")
-
             when {
                 state.flagged -> ImageOnTile(
                     cellSize = size,

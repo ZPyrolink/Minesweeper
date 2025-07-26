@@ -36,7 +36,8 @@ sealed interface Screen {
     data class Game(
         val size: SerializableIntSize,
         val cellSize: Int,
-        val nbBombs: Int
+        val nbBombs: Int,
+        val difficulty: Difficulty
     ) : Screen
 
     @Serializable
@@ -64,7 +65,11 @@ sealed interface Screen {
                 ) {
                     val route = it.toRoute<Game>()
                     GameComp(
-                        MinesweeperBoardState(route.size, route.nbBombs),
+                        MinesweeperBoardState(
+                            route.size,
+                            route.nbBombs,
+                            route.difficulty
+                        ),
                         ctrl,
                         route.cellSize
                     )

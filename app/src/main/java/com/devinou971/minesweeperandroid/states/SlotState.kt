@@ -54,12 +54,10 @@ sealed class SlotState(
         private set
 
     fun reveal() {
-        Log.i(TAG, "reveal: $position")
         revealed = true
     }
 
     fun switchFlag() {
-        Log.i(TAG, "switchFlag: $position")
         flagged = !flagged
     }
 
