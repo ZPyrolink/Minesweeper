@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -38,10 +39,12 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.devinou971.minesweeperandroid.R
+import com.devinou971.minesweeperandroid.Settings
 import com.devinou971.minesweeperandroid.navigation.Screen
 import com.devinou971.minesweeperandroid.serializer.SerializableIntSize
 import com.devinou971.minesweeperandroid.states.MinesweeperBoardState
 import com.devinou971.minesweeperandroid.ui.theme.MinesweeperAndroidTheme
+import com.devinou971.minesweeperandroid.viewmodels.ChronoVM
 import kotlin.random.Random
 
 @Composable
@@ -51,13 +54,27 @@ fun GameComp(
     cellSize: Int
 ) {
     var board by remember { mutableStateOf(state) }
+    val chrono = remember { ChronoVM() }
 
-    if (board.gameOver)
+    fun replay() {
+        chrono.reset()
+        board = board.createNew()
+    }
+
+    if (board.gameOver) {
+        chrono.stop()
+
         GameOverDialog(
-            onReplay = { board = board.createNew() },
-            onAnotherChance = { board.revive() },
-            onReturnToMenu = { navCtrl.popBackStack(Screen.DifficultyChooser, false) }
+            onReplay = ::replay,
+            onAnotherChance = {
+                chrono.start()
+                board.revive()
+            },
+            onReturnToMenu = {
+                navCtrl.popBackStack(Screen.DifficultyChooser, false)
+            }
         )
+    }
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -69,23 +86,36 @@ fun GameComp(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "Number here")
-            Icon(
-                imageVector = Icons.Default.Refresh,
-                contentDescription = "Reload"
-            )
-
-            Text(text = "00:00")
-            Box {
-                IconButton(
-                    onClick = board::changeMode
-                ) {
-                    Image(
-                        painter = painterResource(board.mode.icon),
-                        contentDescription = board.mode.name
-                    )
-                }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Text(text = "${board.nbFlags}")
+                Image(
+                    modifier = Modifier.size(20.dp),
+                    painter = painterResource(Settings.theme[R.drawable.flagicon]),
+                    contentDescription = "Flags"
+                )
             }
+            IconButton(
+                onClick = ::replay
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = "Reload"
+                )
+            }
+
+            Text(text = chrono.currentTime.toComponents { minutes, seconds, _ ->
+                "%02d:%02d".format(minutes, seconds)
+            })
+
+            SlotComp.ImageOnTile(
+                40,
+                Settings.theme[board.mode.icon],
+                desc = board.mode.name,
+                onClick = board::changeMode
+            )
         }
 
         Box(modifier = Modifier.fillMaxSize()) {
@@ -96,7 +126,12 @@ fun GameComp(
                     SlotComp(
                         board[it],
                         size = cellSize
-                    ) { board.slotClick(it) }
+                    ) {
+                        if (board.isFirstTouch)
+                            chrono.start()
+
+                        board.slotClick(it)
+                    }
                 }
             }
         }

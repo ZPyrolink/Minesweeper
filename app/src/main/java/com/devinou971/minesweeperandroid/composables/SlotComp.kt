@@ -30,7 +30,7 @@ sealed interface SlotComp<T : SlotState> {
     data object Bomb : SlotComp<SlotState.Bomb> {
         @Composable
         override operator fun invoke(state: SlotState.Bomb, size: Int) {
-            Mi(
+            ImageOnTile(
                 cellSize = size,
                 icon = Settings.theme[R.drawable.bombicon],
                 desc = "BOOM"
@@ -66,7 +66,7 @@ sealed interface SlotComp<T : SlotState> {
             Log.i(TAG, "Rendering ${state.position}: f=${state.flagged} ; r=${state.revealed}")
 
             when {
-                state.flagged -> Mi(
+                state.flagged -> ImageOnTile(
                     cellSize = size,
                     icon = Settings.theme[R.drawable.flagicon],
                     desc = "Flagged tile",
@@ -90,18 +90,27 @@ sealed interface SlotComp<T : SlotState> {
         }
 
         @Composable
-        fun Mi(
+        fun ImageOnTile(
             cellSize: Int,
             @DrawableRes icon: Int,
             desc: String,
             onClick: (() -> Unit)? = null
-        ) = Image(
+        ) = Box(
             modifier = Modifier
                 .size(cellSize.dp)
                 .clickable(onClick = { onClick?.invoke() }),
-            painter = painterResource(id = icon),
-            contentDescription = desc
-        )
+        ) {
+            Image(
+                painter = painterResource(R.drawable.emptytile),
+                contentDescription = "Empty tile"
+            )
+
+            Image(
+
+                painter = painterResource(id = icon),
+                contentDescription = desc
+            )
+        }
     }
 
     @Composable
