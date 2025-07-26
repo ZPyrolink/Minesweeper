@@ -154,4 +154,6 @@ class MinesweeperBoardState(
             ?.filter { slot -> slot is SlotState.Bomb && slot.revealed }
             ?.forEach { it.hide() }
     }
+
+    fun createNew() = MinesweeperBoardState(size, nbBombs)
 }

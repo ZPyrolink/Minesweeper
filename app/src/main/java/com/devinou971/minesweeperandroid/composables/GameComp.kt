@@ -21,6 +21,10 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -42,13 +46,15 @@ import kotlin.random.Random
 
 @Composable
 fun GameComp(
-    board: MinesweeperBoardState,
+    state: MinesweeperBoardState,
     navCtrl: NavController,
     cellSize: Int
 ) {
+    var board by remember { mutableStateOf(state) }
+
     if (board.gameOver)
         GameOverDialog(
-            onReplay = { TODO() },
+            onReplay = { board = board.createNew() },
             onAnotherChance = { board.revive() },
             onReturnToMenu = { navCtrl.popBackStack(Screen.DifficultyChooser, false) }
         )
@@ -170,7 +176,7 @@ private fun Preview() = MinesweeperAndroidTheme(true) {
     Surface {
         val game = MinesweeperBoardState(SerializableIntSize(nbC, nbC), 8)
         GameComp(
-            board = game,
+            state = game,
             navCtrl = rememberNavController(),
             cellSize = width / nbC
         )
@@ -185,7 +191,7 @@ private fun PreviewGenerated() = MinesweeperAndroidTheme(true) {
             .apply { slotClick(Point()) }
 
         GameComp(
-            board = game,
+            state = game,
             navCtrl = rememberNavController(),
             cellSize = width / nbC
         )
@@ -218,7 +224,7 @@ private fun PreviewGO() = MinesweeperAndroidTheme(true) {
             }
 
         GameComp(
-            board = game,
+            state = game,
             navCtrl = rememberNavController(),
             cellSize = width / nbC
         )
