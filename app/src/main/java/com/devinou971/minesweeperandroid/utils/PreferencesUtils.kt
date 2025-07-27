@@ -6,6 +6,8 @@ import com.devinou971.minesweeperandroid.wrappers.ColorWrapper
 import kotlin.reflect.KMutableProperty0
 import kotlin.reflect.KProperty0
 
+//region Get
+
 fun <V, T> SharedPreferences.getNullable(
     ref: KMutableProperty0<V?>,
     ifNotNull: (String, T) -> V,
@@ -82,6 +84,10 @@ fun SharedPreferences.getFloatRange(
 ): ClosedFloatingPointRange<Float> =
     getFloat("${key}Start", default.start)..getFloat("${key}End", default.endInclusive)
 
+//endregion
+
+//region Put
+
 private typealias Editor = SharedPreferences.Editor
 
 fun <T> Editor.removeOrPut(ref: KProperty0<T>): Editor = when (val value = ref.get()) {
@@ -140,3 +146,5 @@ fun Editor.putFloatRange(
     putFloat("${key}Start", value.start)
     putFloat("${key}End", value.endInclusive)
 }
+
+//endregion

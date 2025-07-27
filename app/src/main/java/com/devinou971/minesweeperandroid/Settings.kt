@@ -3,24 +3,19 @@ package com.devinou971.minesweeperandroid
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.annotation.DrawableRes
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.graphics.Color
 import androidx.core.content.edit
 import com.devinou971.minesweeperandroid.utils.get
+import com.devinou971.minesweeperandroid.utils.getList
+import com.devinou971.minesweeperandroid.utils.put
+import com.devinou971.minesweeperandroid.utils.putList
+import com.devinou971.minesweeperandroid.wrappers.ColorWrapper
 
 private typealias D = R.drawable
 
 object Settings {
-    @Deprecated("Use the color instead!")
-    lateinit var colors: IntArray
-    var newColors: SnapshotStateList<Color> = mutableStateListOf(*Defaults.colors.toTypedArray())
-        private set
-
-    var theme: Theme by mutableStateOf(Defaults.theme)
+    var colors: List<Color> = Defaults.colors.toList()
+    var theme: Theme = Defaults.theme
 
     private object Defaults {
         val colors: List<Color> = mutableListOf(
@@ -43,27 +38,24 @@ object Settings {
         if (settings.contains("init"))
             get(settings)
         else
-            reset(context)
+            save(context)
     }
 
-    public fun reset(context: Context) {
-        newColors = mutableStateListOf(*Defaults.colors.toTypedArray())
+    public fun reset() {
+        colors = Defaults.colors.toList()
         theme = Defaults.theme
-
-        save(context)
     }
 
     private fun get(settings: SharedPreferences) = settings.apply {
-//        getMutableList(::newColors, Defaults.colors, ColorWrapper.stringWrapper::from)
-//        TODO
+        getList(::colors, colors, ColorWrapper.stringWrapper::from)
         get(::theme, Defaults.theme)
     }
 
     fun save(context: Context) {
         context.getSharedPreferences("Settings", Context.MODE_PRIVATE).edit(true) {
-//            putBoolean("init", true)
-//            putList(::newColors, ColorWrapper.stringWrapper::to)
-//            put(::theme)
+            putBoolean("init", true)
+            putList(::colors, ColorWrapper.stringWrapper::to)
+            put(::theme)
         }
     }
 

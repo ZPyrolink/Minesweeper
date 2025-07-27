@@ -24,12 +24,13 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,23 +51,32 @@ import com.devinou971.minesweeperandroid.Settings
 import com.devinou971.minesweeperandroid.composables.utils.RgbColorPicker
 import com.devinou971.minesweeperandroid.extensions.ToastExt
 import com.devinou971.minesweeperandroid.extensions.toColorString
-import com.devinou971.minesweeperandroid.storageclasses.AppDatabase
 import com.devinou971.minesweeperandroid.ui.theme.MinesweeperAndroidTheme
 import com.devinou971.minesweeperandroid.utils.rememberMutableState
+import com.devinou971.minesweeperandroid.viewmodels.SettingsVM
 
 @Composable
-fun ParametersComp() = Column(
+fun ParametersComp(
+    vm: SettingsVM = remember { SettingsVM() }
+) = Column(
     modifier = Modifier
         .fillMaxSize()
         .padding(horizontal = 25.dp, vertical = 10.dp)
 ) {
+    val ctx = LocalContext.current
+
+    DisposableEffect(Unit) {
+        onDispose {
+            vm.save(ctx)
+        }
+    }
     Text(
         text = stringResource(id = R.string.colors),
         textAlign = TextAlign.Center,
         fontSize = 25.sp
     )
 
-    ColorList(colors = Settings.newColors)
+    ColorList(settingsVM = vm)
 
     Spacer(modifier = Modifier.height(10.dp))
 
@@ -76,11 +86,12 @@ fun ParametersComp() = Column(
         fontSize = 25.sp
     )
 
-    ThemeList(themes = Settings.Theme.entries)
+    ThemeList(
+        settingsVM = vm,
+        themes = Settings.Theme.entries
+    )
 
     Spacer(modifier = Modifier.weight(1f))
-
-    val ctx = LocalContext.current
 
     Row(
         modifier = Modifier
@@ -89,15 +100,14 @@ fun ParametersComp() = Column(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Button(onClick = {
-            Settings.reset(ctx)
-            Settings.save(ctx)
+            vm.reset()
             ToastExt.showText(ctx, R.string.settings_cleared, Toast.LENGTH_SHORT)
         }) {
             Text(text = stringResource(id = R.string.clear_settings))
         }
 
         Button(onClick = {
-            AppDatabase.getAppDataBase(ctx).clearAllTables()
+            vm.clearData(ctx)
             ToastExt.showText(ctx, "Data cleared!", Toast.LENGTH_SHORT)
         }) {
             Text(text = stringResource(id = R.string.clear_data))
@@ -106,13 +116,15 @@ fun ParametersComp() = Column(
 }
 
 @Composable
-fun ColorList(colors: List<Color>) = LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-    itemsIndexed(colors) { i, it -> ColorItem(it, i) }
+fun ColorList(
+    settingsVM: SettingsVM
+) = LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    itemsIndexed(settingsVM.colors) { i, it -> ColorItem(settingsVM, it, i) }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ColorItem(
+    settingsVM: SettingsVM,
     color: Color,
     index: Int
 ) {
@@ -121,16 +133,13 @@ fun ColorItem(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        val ctx = LocalContext.current
-
         var colorPicker by rememberMutableState(value = false)
         var tmpColor by rememberMutableState(value = color)
         var currentColor by rememberMutableState(value = tmpColor)
 
         fun updateColor() {
             currentColor = tmpColor
-            Settings.newColors[index] = currentColor
-            Settings.save(ctx)
+            settingsVM.changeColor(index, currentColor)
         }
 
         if (colorPicker) {
@@ -164,11 +173,12 @@ fun ColorItem(
 
         Text(text = "${index + 1}")
         Spacer(modifier = Modifier.weight(1f))
-        Box(modifier = Modifier
-            .fillMaxHeight(.5f)
-            .aspectRatio(1f)
-            .background(color)
-            .clickable { colorPicker = true })
+        Box(
+            modifier = Modifier
+                .fillMaxHeight(.5f)
+                .aspectRatio(1f)
+                .background(color)
+                .clickable { colorPicker = true })
 
         var error by rememberMutableState(value = false)
         TextField(
@@ -200,7 +210,10 @@ fun ColorItem(
 val themeIconSize = 35.dp
 
 @Composable
-fun ThemeList(themes: List<Settings.Theme>) = LazyVerticalGrid(
+fun ThemeList(
+    settingsVM: SettingsVM,
+    themes: List<Settings.Theme>
+) = LazyVerticalGrid(
     columns = GridCells.Adaptive(themeIconSize),
     verticalArrangement = Arrangement.spacedBy(5.dp),
     horizontalArrangement = Arrangement.spacedBy(5.dp)
@@ -210,11 +223,8 @@ fun ThemeList(themes: List<Settings.Theme>) = LazyVerticalGrid(
 
         ThemeItem(
             theme = it,
-            selected = it == Settings.theme,
-            onSelect = { t ->
-                Settings.theme = t
-                Settings.save(ctx)
-            }
+            selected = it == settingsVM.theme,
+            onSelect = { t -> settingsVM.theme = t }
         )
     }
 }

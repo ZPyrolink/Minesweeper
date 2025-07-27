@@ -1,6 +1,5 @@
 package com.devinou971.minesweeperandroid.composables
 
-import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -52,7 +51,7 @@ sealed interface SlotComp<T : SlotState> {
                     .size(size.dp)
                     .wrapContentHeight(align = Alignment.CenterVertically),
                 text = state.nbBombs.toString(),
-                color = Settings.newColors[state.nbBombs - 1],
+                color = Settings.colors[state.nbBombs - 1],
                 fontSize = 25.sp,
                 textAlign = TextAlign.Center
             )
