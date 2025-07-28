@@ -35,7 +35,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -50,7 +49,7 @@ import com.devinou971.minesweeperandroid.R
 import com.devinou971.minesweeperandroid.Settings
 import com.devinou971.minesweeperandroid.composables.utils.RgbColorPicker
 import com.devinou971.minesweeperandroid.extensions.ToastExt
-import com.devinou971.minesweeperandroid.extensions.toColorString
+import com.devinou971.minesweeperandroid.extensions.toHexString
 import com.devinou971.minesweeperandroid.ui.theme.MinesweeperAndroidTheme
 import com.devinou971.minesweeperandroid.utils.rememberMutableState
 import com.devinou971.minesweeperandroid.viewmodels.SettingsVM
@@ -183,7 +182,7 @@ fun ColorItem(
         var error by rememberMutableState(value = false)
         TextField(
             modifier = Modifier.fillMaxWidth(2 / 3f),
-            value = color.toArgb().toColorString(),
+            value = color.toHexString(),
             leadingIcon = { Text(text = "#", fontFamily = FontFamily.Default) },
             onValueChange = {
                 error = (it.length == 3 || it.length == 6) && it.all { c ->
