@@ -2,8 +2,6 @@ package com.devinou971.minesweeperandroid.extensions
 
 
 import android.graphics.Point
-import android.graphics.PointF
-import android.view.MotionEvent
 
 fun Point.nextTo(o: Point, inclusive: Boolean = true): Boolean =
     o.y in this.y - 1..this.y + 1 &&
@@ -40,5 +38,3 @@ fun Point.until(rows: Int, columns: Int) = object : Iterator<Point> {
         return current
     }
 }
-
-fun PointF(e: MotionEvent) = PointF(e.x, e.y)
