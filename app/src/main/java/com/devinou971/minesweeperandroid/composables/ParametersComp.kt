@@ -218,8 +218,6 @@ fun ThemeList(
     horizontalArrangement = Arrangement.spacedBy(5.dp)
 ) {
     items(themes) {
-        val ctx = LocalContext.current
-
         ThemeItem(
             theme = it,
             selected = it == settingsVM.theme,
