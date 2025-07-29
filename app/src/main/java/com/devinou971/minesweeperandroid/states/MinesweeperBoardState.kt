@@ -64,7 +64,7 @@ class MinesweeperBoardState(
     private fun generate(firstTouch: Point) {
         val bombs = mutableListOf<Point>()
 
-        for (i in 1..nbBombs) {
+        repeat(nbBombs) {
             var point: Point
             do {
                 point = Random.nextPoint(
