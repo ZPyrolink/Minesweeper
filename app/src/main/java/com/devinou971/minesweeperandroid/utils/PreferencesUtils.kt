@@ -17,7 +17,10 @@ fun <V, T> SharedPreferences.getNullable(
 fun <T> SharedPreferences.get(ref: KMutableProperty0<T>, default: T): Unit =
     ref.set(get(ref.name, default))
 
-inline fun <reified T : Enum<T>> SharedPreferences.get(ref: KMutableProperty0<T>, default: T): Unit =
+inline fun <reified T : Enum<T>> SharedPreferences.get(
+    ref: KMutableProperty0<T>,
+    default: T
+): Unit =
     ref.set(get(ref.name, default))
 
 @Suppress("UNCHECKED_CAST")
@@ -54,29 +57,18 @@ inline fun <reified T : Enum<T>> SharedPreferences.getEnum(name: String, default
 fun SharedPreferences.getColor(name: String, default: Int): Color =
     ColorWrapper.intWrapper.from(getInt(name, default))
 
-fun <T> SharedPreferences.getList(
-    ref: KMutableProperty0<List<T>>,
-    default: List<T>,
-    transform: (String) -> T
-): Unit = ref.set(getList(ref.name, default, transform))
+fun SharedPreferences.getColorList(
+    ref: KMutableProperty0<List<Color>>,
+    default: List<Color>
+): Unit = ref.set(getColorList(ref.name, default))
 
-fun <T> SharedPreferences.getMutableList(
-    ref: KMutableProperty0<MutableList<T>>,
-    default: MutableList<T>,
-    transform: (String) -> T
-): Unit = ref.set(getMutableList(ref.name, default, transform))
-
-fun <T> SharedPreferences.getList(
+fun SharedPreferences.getColorList(
     key: String,
-    default: List<T>,
-    transform: (String) -> T
-): List<T> = getStringSet(key, null)?.map(transform) ?: default
-
-fun <T> SharedPreferences.getMutableList(
-    key: String,
-    default: MutableList<T>,
-    transform: (String) -> T
-): MutableList<T> = getStringSet(key, null)?.map(transform)?.toMutableList() ?: default
+    default: List<Color>
+): List<Color> = getString(key, null)
+    ?.split(';')
+    ?.map(ColorWrapper.stringWrapper::from)
+    ?: default
 
 fun SharedPreferences.getFloatRange(
     key: String,
@@ -128,16 +120,14 @@ fun <T : Enum<T>> Editor.putEnum(key: String, value: Enum<T>): Editor = putStrin
 fun Editor.putColor(key: String, value: Color): Editor =
     putInt(key, ColorWrapper.intWrapper.to(value))
 
-fun <T> Editor.putList(
-    ref: KProperty0<List<T>>,
-    transform: (T) -> String = { it.toString() }
-): Editor = putList(ref.name, ref.get(), transform)
+fun Editor.putColorList(
+    ref: KProperty0<List<Color>>,
+): Editor = putColorList(ref.name, ref.get())
 
-fun <T> Editor.putList(
+fun Editor.putColorList(
     key: String,
-    list: List<T>,
-    transform: (T) -> String = { it.toString() }
-): Editor = putStringSet(key, list.map(transform).toSet())
+    list: List<Color>,
+): Editor = putString(key, list.joinToString(";", transform = ColorWrapper.stringWrapper::to))
 
 fun Editor.putFloatRange(
     key: String,

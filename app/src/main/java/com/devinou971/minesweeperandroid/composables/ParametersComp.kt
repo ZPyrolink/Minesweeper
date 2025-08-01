@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -36,7 +37,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
@@ -51,12 +51,14 @@ import com.devinou971.minesweeperandroid.composables.utils.RgbColorPicker
 import com.devinou971.minesweeperandroid.extensions.ToastExt
 import com.devinou971.minesweeperandroid.extensions.toHexString
 import com.devinou971.minesweeperandroid.ui.theme.MinesweeperAndroidTheme
+import com.devinou971.minesweeperandroid.ui.theme.htmlColorScheme
+import com.devinou971.minesweeperandroid.ui.theme.slotColorScheme
 import com.devinou971.minesweeperandroid.utils.rememberMutableState
 import com.devinou971.minesweeperandroid.viewmodels.SettingsVM
 
 @Composable
 fun ParametersComp(
-    vm: SettingsVM = remember { SettingsVM() }
+    vm: SettingsVM
 ) = Column(
     modifier = Modifier
         .fillMaxSize()
@@ -69,6 +71,7 @@ fun ParametersComp(
             vm.save(ctx)
         }
     }
+
     Text(
         text = stringResource(id = R.string.colors),
         textAlign = TextAlign.Center,
@@ -117,8 +120,12 @@ fun ParametersComp(
 @Composable
 fun ColorList(
     settingsVM: SettingsVM
-) = LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-    itemsIndexed(settingsVM.colors) { i, it -> ColorItem(settingsVM, it, i) }
+) {
+    val colors = settingsVM.colors
+
+    LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        itemsIndexed(colors) { i, it -> ColorItem(settingsVM, it, i) }
+    }
 }
 
 @Composable
@@ -244,7 +251,7 @@ fun ThemeItem(
             .clickable { onSelect(theme) }
             .apply {
                 if (selected)
-                    background(colorResource(id = R.color.gainsboro))
+                    background(MaterialTheme.htmlColorScheme.gainsboro)
             },
         painter = painterResource(id = theme.icon),
         contentDescription = "${theme.name} theme"
@@ -253,4 +260,9 @@ fun ThemeItem(
 
 @Preview
 @Composable
-private fun Preview() = MinesweeperAndroidTheme(true) { Surface { ParametersComp() } }
+private fun Preview() = MinesweeperAndroidTheme(true) {
+    Surface {
+        val dc = MaterialTheme.slotColorScheme.content
+        ParametersComp(remember { SettingsVM(dc) })
+    }
+}

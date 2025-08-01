@@ -2,61 +2,61 @@ package com.devinou971.minesweeperandroid
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.compose.ui.graphics.Color
 import androidx.core.content.edit
+import com.devinou971.minesweeperandroid.ui.theme.colors.SlotColorScheme
 import com.devinou971.minesweeperandroid.utils.get
-import com.devinou971.minesweeperandroid.utils.getList
+import com.devinou971.minesweeperandroid.utils.getColorList
 import com.devinou971.minesweeperandroid.utils.put
-import com.devinou971.minesweeperandroid.utils.putList
-import com.devinou971.minesweeperandroid.wrappers.ColorWrapper
+import com.devinou971.minesweeperandroid.utils.putColorList
 
 private typealias D = R.drawable
 
+private const val TAG = "Settings"
+
 object Settings {
-    var colors: List<Color> = Defaults.colors.toList()
+    var colors: List<Color> = emptyList()
     var theme: Theme = Defaults.theme
 
     private object Defaults {
-        val colors: List<Color> = mutableListOf(
-            Color.Blue,
-            Color.Green,
-            Color.Red,
-            Color(0, 0, 0x7f),
-            Color(0x7f, 0, 0),
-            Color(0xff, 0xc0, 0xcb),
-            Color.Magenta,
-            Color.Cyan,
-            Color.Yellow
-        )
         val theme: Theme = Theme.DEFAULT
     }
 
     fun init(context: Context) {
         val settings = context.getSharedPreferences("Settings", Context.MODE_PRIVATE)
 
-        if (settings.contains("init"))
+        if (settings.contains("init")) {
             get(settings)
-        else
+        } else {
             save(context)
+        }
     }
 
     public fun reset() {
-        colors = Defaults.colors.toList()
+        colors = SlotColorScheme.light.toList()
         theme = Defaults.theme
     }
 
     private fun get(settings: SharedPreferences) = settings.apply {
-        getList(::colors, colors, ColorWrapper.stringWrapper::from)
+        getColorList(::colors, colors)
+        Log.i(TAG, "get: Colors = $colors")
         get(::theme, Defaults.theme)
+        Log.i(TAG, "get: Theme = $theme")
     }
 
     fun save(context: Context) {
+        Log.i(TAG, "save: $this")
         context.getSharedPreferences("Settings", Context.MODE_PRIVATE).edit(true) {
             putBoolean("init", true)
-            putList(::colors, ColorWrapper.stringWrapper::to)
+            putColorList(::colors)
             put(::theme)
         }
+    }
+
+    override fun toString(): String {
+        return "Settings(colors=$colors, theme=$theme)"
     }
 
     enum class Theme(private val map: Map<Int, Int>?, @DrawableRes val icon: Int) {

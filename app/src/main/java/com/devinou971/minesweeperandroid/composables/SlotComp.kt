@@ -1,23 +1,30 @@
 package com.devinou971.minesweeperandroid.composables
 
+import android.graphics.Point
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.devinou971.minesweeperandroid.R
 import com.devinou971.minesweeperandroid.Settings
 import com.devinou971.minesweeperandroid.states.SlotState
+import com.devinou971.minesweeperandroid.ui.theme.MinesweeperAndroidTheme
+import com.devinou971.minesweeperandroid.ui.theme.slotColorScheme
 
 private const val TAG = "SlotComp"
 
@@ -51,7 +58,7 @@ sealed interface SlotComp<T : SlotState> {
                     .size(size.dp)
                     .wrapContentHeight(align = Alignment.CenterVertically),
                 text = state.nbBombs.toString(),
-                color = Settings.colors[state.nbBombs - 1],
+                color = MaterialTheme.slotColorScheme[state.nbBombs - 1],
                 fontSize = 25.sp,
                 textAlign = TextAlign.Center
             )
@@ -115,4 +122,19 @@ sealed interface SlotComp<T : SlotState> {
 
     @Composable
     operator fun invoke(state: T, size: Int)
+}
+
+@PreviewLightDark
+@Composable
+private fun NumbersPrev() = MinesweeperAndroidTheme {
+    Surface {
+        Column {
+            for (i in 1..9)
+                SlotComp(
+                    state = SlotState.Number(Point(), i)
+                        .apply { reveal() },
+                    size = 64
+                ) {}
+        }
+    }
 }

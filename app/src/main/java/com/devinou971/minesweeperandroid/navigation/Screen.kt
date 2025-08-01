@@ -1,22 +1,24 @@
 package com.devinou971.minesweeperandroid.navigation
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.createGraph
 import androidx.navigation.toRoute
-import com.devinou971.minesweeperandroid.states.MinesweeperBoardState
 import com.devinou971.minesweeperandroid.composables.CustomGameComp
 import com.devinou971.minesweeperandroid.composables.GameComp
 import com.devinou971.minesweeperandroid.composables.MainComp
 import com.devinou971.minesweeperandroid.composables.MenuComp
 import com.devinou971.minesweeperandroid.composables.ParametersComp
 import com.devinou971.minesweeperandroid.serializer.SerializableIntSize
+import com.devinou971.minesweeperandroid.states.MinesweeperBoardState
+import com.devinou971.minesweeperandroid.ui.theme.slotColorScheme
 import com.devinou971.minesweeperandroid.utils.Difficulty
+import com.devinou971.minesweeperandroid.viewmodels.SettingsVM
 import kotlinx.serialization.Serializable
 import kotlin.reflect.typeOf
 
@@ -74,7 +76,10 @@ sealed interface Screen {
                         route.cellSize
                     )
                 }
-                composable<Parameters> { ParametersComp() }
+                composable<Parameters> {
+                    val dc = MaterialTheme.slotColorScheme.content
+                    ParametersComp(remember { SettingsVM(dc) })
+                }
             }
         }
     }
