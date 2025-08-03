@@ -1,64 +1,25 @@
 package com.devinou971.minesweeperandroid
 
 import android.content.Context
-import android.content.SharedPreferences
-import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.compose.ui.graphics.Color
-import androidx.core.content.edit
-import com.devinou971.minesweeperandroid.ui.theme.colors.SlotColorScheme
-import com.devinou971.minesweeperandroid.utils.get
-import com.devinou971.minesweeperandroid.utils.getColorList
-import com.devinou971.minesweeperandroid.utils.put
-import com.devinou971.minesweeperandroid.utils.putColorList
+import androidx.datastore.core.DataStore
+import androidx.datastore.dataStore
+import com.devinou971.minesweeperandroid.serializer.SettingsSerializer
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.Serializable
 
 private typealias D = R.drawable
 
-private const val TAG = "Settings"
+private val Context.settingsDs: DataStore<Settings> by dataStore("Settings", SettingsSerializer)
 
-object Settings {
-    var colors: List<Color> = emptyList()
-    var theme: Theme = Defaults.theme
-
-    private object Defaults {
-        val theme: Theme = Theme.DEFAULT
-    }
-
-    fun init(context: Context) {
-        val settings = context.getSharedPreferences("Settings", Context.MODE_PRIVATE)
-
-        if (settings.contains("init")) {
-            get(settings)
-        } else {
-            save(context)
-        }
-    }
-
-    public fun reset() {
-        colors = SlotColorScheme.light.toList()
-        theme = Defaults.theme
-    }
-
-    private fun get(settings: SharedPreferences) = settings.apply {
-        getColorList(::colors, colors)
-        Log.i(TAG, "get: Colors = $colors")
-        get(::theme, Defaults.theme)
-        Log.i(TAG, "get: Theme = $theme")
-    }
-
-    fun save(context: Context) {
-        Log.i(TAG, "save: $this")
-        context.getSharedPreferences("Settings", Context.MODE_PRIVATE).edit(true) {
-            putBoolean("init", true)
-            putColorList(::colors)
-            put(::theme)
-        }
-    }
-
-    override fun toString(): String {
-        return "Settings(colors=$colors, theme=$theme)"
-    }
-
+@Serializable(with = SettingsSerializer::class)
+sealed class Settings(
+    var colors: List<Color>,
+    var theme: Theme
+) {
+    @Serializable
     enum class Theme(private val map: Map<Int, Int>?, @DrawableRes val icon: Int) {
         DEFAULT(null, D.bombicon_new),
         MINECRAFT(
@@ -79,4 +40,39 @@ object Settings {
         @DrawableRes
         operator fun get(resource: Int) = map?.get(resource) ?: resource
     }
+
+    companion object Default : Settings(
+        emptyList(),
+        Theme.DEFAULT
+    ) {
+        fun init(ctx: Context) {
+            val dto = readDataStore(ctx)
+
+            theme = dto.theme
+            colors = dto.colors
+        }
+
+        fun reset() {
+            val dto = SettingsSerializer.defaultValue
+
+            colors = dto.colors
+            theme = dto.theme
+        }
+
+        fun readDataStore(ctx: Context): Settings = runBlocking {
+            ctx.settingsDs.data.first()
+        }
+
+        fun save(ctx: Context) {
+            runBlocking {
+                ctx.settingsDs.updateData { Settings }
+            }
+        }
+
+        override fun toString(): String {
+            return "Settings(colors=$colors, theme=$theme)"
+        }
+    }
+
+    class DTO(colors: List<Color>, theme: Theme) : Settings(colors, theme)
 }
