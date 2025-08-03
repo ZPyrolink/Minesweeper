@@ -6,6 +6,7 @@ compose = "1.8.0"
 composeBom = "2025.05.00"
 constraintlayout = "2.2.1"
 coreKtx = "1.16.0"
+datastore = "1.1.7"
 kotlin = "2.1.21"
 kotlinxCoroutinesCore = "1.7.3"
 lifecycleRuntimeKtx = "2.9.0"
@@ -13,7 +14,7 @@ material = "1.12.0"
 nav = "2.9.0"
 roomCompiler = "2.7.1"
 roomRuntime = "2.7.1"
-serialization="1.6.3"
+serialization = "1.6.3"
 ksp = "2.1.21-2.0.1"
 
 [libraries]
@@ -22,6 +23,7 @@ androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "a
 androidx-compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
 androidx-constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
+androidx-datastore = { group = "androidx.datastore", name = "datastore", version.ref = "datastore" }
 androidx-lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-material3 = { module = "androidx.compose.material3:material3" }
 androidx-nav = { group = "androidx.navigation", name = "navigation-compose", version.ref = "nav" }
@@ -34,7 +36,7 @@ androidx-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
 androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
-kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref="serialization" }
+kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
 
 [plugins]
