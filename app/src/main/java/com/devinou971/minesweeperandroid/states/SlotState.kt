@@ -9,10 +9,18 @@ import com.devinou971.minesweeperandroid.extensions.nextTo
 sealed class SlotState(
     val position: Point
 ) {
-    object State {
-        const val BOMB = "B"
-        const val FLAG = "F"
-        const val HIDE = "#"
+    enum class State(val str: String? = null) {
+        Hidded("#"),
+        Flagged("F"),
+        Revealed;
+
+        fun switchFlag(): State {
+            return when (this) {
+                Hidded -> Flagged
+                Flagged -> Hidded
+                else -> throw IllegalStateException("A $this cannot switch flag")
+            }
+        }
     }
 
     class Null(position: Point) : SlotState(position)
@@ -21,33 +29,29 @@ sealed class SlotState(
 
     class Number(position: Point, val nbBombs: Int) : SlotState(position)
 
-    var revealed: Boolean by mutableStateOf(false)
+    var state: State by mutableStateOf(State.Hidded)
         private set
 
-    var flagged: Boolean by mutableStateOf(false)
-        private set
+    val revealed get() = state == State.Revealed
+    val flagged get() = state == State.Flagged
 
     fun reveal() {
-        revealed = true
+        state = State.Revealed
     }
 
     fun switchFlag() {
-        flagged = !flagged
+        state = state.switchFlag()
     }
 
-    override fun toString(): String = when {
-        flagged -> State.FLAG
-        revealed -> if (this is Number) "$nbBombs" else State.BOMB
-        else -> State.HIDE
-    }
+    override fun toString(): String = state.str ?: if (this is Number) "$nbBombs" else "B"
 
     fun getUnseenNeighbors(grid: List<List<SlotState>>): List<SlotState> =
         grid.flatMap { it.asSequence() }
-            .filter { x -> position.nextTo(x.position, false) && !x.revealed }
+            .filter { x -> position.nextTo(x.position, false) && x.state != State.Revealed }
 
-    fun xRayView() = if (this is Number) "$nbBombs" else State.BOMB
+    fun xRayView() = if (this is Number) "$nbBombs" else "B"
 
     fun hide() {
-        revealed = false
+        state = State.Hidded
     }
 }
