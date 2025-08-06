@@ -49,6 +49,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
@@ -332,9 +333,9 @@ fun ThemeItem(
     )
 }
 
-@Preview
+@PreviewLightDark
 @Composable
-private fun Preview() = MinesweeperAndroidTheme(true) {
+private fun Preview() = MinesweeperAndroidTheme {
     Surface {
         val dc = MaterialTheme.slotColorScheme.content
         ParametersComp(

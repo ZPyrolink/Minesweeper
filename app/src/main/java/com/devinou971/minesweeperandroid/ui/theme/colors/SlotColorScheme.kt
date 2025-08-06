@@ -38,7 +38,7 @@ abstract class SlotColorScheme(val content: List<Color> = emptyList()) {
             Color.Magenta,
 
             Color(0xFFFF97A5),
-            Color.Cyan,
+            Color(0XFFADD8E6),
             Color(0xFFffd700)
         )
     }
