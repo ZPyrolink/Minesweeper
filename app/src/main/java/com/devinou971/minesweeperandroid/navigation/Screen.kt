@@ -78,7 +78,10 @@ sealed interface Screen {
                 }
                 composable<Parameters> {
                     val dc = MaterialTheme.slotColorScheme.content
-                    ParametersComp(remember { SettingsVM(dc) })
+                    ParametersComp(
+                        remember { SettingsVM(dc) },
+                        ctrl
+                    )
                 }
             }
         }

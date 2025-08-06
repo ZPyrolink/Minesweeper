@@ -22,8 +22,15 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -45,6 +52,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.devinou971.minesweeperandroid.R
 import com.devinou971.minesweeperandroid.Settings
 import com.devinou971.minesweeperandroid.composables.utils.RgbColorPicker
@@ -58,19 +67,14 @@ import com.devinou971.minesweeperandroid.viewmodels.SettingsVM
 
 @Composable
 fun ParametersComp(
-    vm: SettingsVM
+    vm: SettingsVM,
+    navCtrl: NavController,
 ) = Column(
     modifier = Modifier
         .fillMaxSize()
         .padding(horizontal = 25.dp, vertical = 10.dp)
 ) {
     val ctx = LocalContext.current
-
-    DisposableEffect(Unit) {
-        onDispose {
-            vm.save(ctx)
-        }
-    }
 
     Text(
         text = stringResource(id = R.string.colors),
@@ -95,25 +99,95 @@ fun ParametersComp(
 
     Spacer(modifier = Modifier.weight(1f))
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 10.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Button(onClick = {
+    CancelValidateButtons(
+        onCancel = { navCtrl.popBackStack() },
+        onValidate = {
+            vm.save(ctx)
+            navCtrl.popBackStack()
+        }
+    )
+    ResetClearButtons(
+        onReset = {
             vm.reset()
             ToastExt.showText(ctx, R.string.settings_cleared, Toast.LENGTH_SHORT)
-        }) {
-            Text(text = stringResource(id = R.string.clear_settings))
-        }
-
-        Button(onClick = {
+        },
+        onClear = {
             vm.clearData(ctx)
             ToastExt.showText(ctx, "Data cleared!", Toast.LENGTH_SHORT)
-        }) {
-            Text(text = stringResource(id = R.string.clear_data))
         }
+    )
+}
+
+@Composable
+private fun CancelValidateButtons(
+    onCancel: () -> Unit,
+    onValidate: () -> Unit
+) = Row(
+    modifier = Modifier.fillMaxWidth(),
+    horizontalArrangement = Arrangement.SpaceBetween
+) {
+    val mod = Modifier.size(64.dp)
+
+    IconButton(onClick = onCancel) {
+        Icon(
+            modifier = mod,
+            tint = MaterialTheme.colorScheme.error,
+            imageVector = Icons.Default.Cancel,
+            contentDescription = "Validate"
+        )
+    }
+
+    IconButton(onClick = onValidate) {
+        Icon(
+            modifier = mod,
+            tint = MaterialTheme.colorScheme.primary,
+            imageVector = Icons.Default.CheckCircle,
+            contentDescription = "Validate"
+        )
+    }
+}
+
+@Composable
+private fun ResetClearButtons(
+    onReset: () -> Unit,
+    onClear: () -> Unit
+) = Row(
+    modifier = Modifier
+        .fillMaxWidth()
+        .padding(top = 10.dp),
+) {
+    val buttonsColors = MaterialTheme.colorScheme.run {
+        ButtonDefaults.buttonColors(
+            containerColor = secondary,
+            contentColor = onSecondary
+        )
+    }
+
+    val mod = Modifier.weight(1f)
+    val style = MaterialTheme.typography.bodySmall
+
+    Button(
+        modifier = mod,
+        colors = buttonsColors,
+        onClick = onReset
+    ) {
+        Text(
+            text = stringResource(id = R.string.clear_settings),
+            style = style
+        )
+    }
+
+    Spacer(Modifier.weight(.25f))
+
+    Button(
+        modifier = mod,
+        colors = buttonsColors,
+        onClick = onClear
+    ) {
+        Text(
+            text = stringResource(id = R.string.clear_data),
+            style = style
+        )
     }
 }
 
@@ -263,6 +337,9 @@ fun ThemeItem(
 private fun Preview() = MinesweeperAndroidTheme(true) {
     Surface {
         val dc = MaterialTheme.slotColorScheme.content
-        ParametersComp(remember { SettingsVM(dc) })
+        ParametersComp(
+            remember { SettingsVM(dc) },
+            rememberNavController()
+        )
     }
 }

@@ -1,5 +1,6 @@
 package com.devinou971.minesweeperandroid.ui.theme
 
+import android.R.attr.fontFamily
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -18,21 +19,21 @@ val pixelatedPusab = FontFamily(Font(R.font.pixelated_pusab))
 
 // Set of Material typography styles to start with
 val Typography = Typography(
-    displayLarge = TextStyle(fontFamily = pixelatedPusab),
-    displayMedium = TextStyle(fontFamily = pixelatedPusab),
-    displaySmall = TextStyle(fontFamily = pixelatedPusab),
-    headlineLarge = TextStyle(fontFamily = pixelatedPusab),
-    headlineMedium = TextStyle(fontFamily = pixelatedPusab),
-    headlineSmall = TextStyle(fontFamily = pixelatedPusab),
-    titleLarge = TextStyle(fontFamily = pixelatedPusab),
-    titleMedium = TextStyle(fontFamily = pixelatedPusab),
-    titleSmall = TextStyle(fontFamily = pixelatedPusab),
-    bodyLarge = TextStyle(fontFamily = pixelatedPusab),
-    bodyMedium = TextStyle(fontFamily = pixelatedPusab),
-    bodySmall = TextStyle(fontFamily = pixelatedPusab),
-    labelLarge = TextStyle(fontFamily = pixelatedPusab),
-    labelMedium = TextStyle(fontFamily = pixelatedPusab),
-    labelSmall = TextStyle(fontFamily = pixelatedPusab)
+    displayLarge = Typography().displayLarge.copy(fontFamily = pixelatedPusab),
+    displayMedium = Typography().displayMedium.copy(fontFamily = pixelatedPusab),
+    displaySmall = Typography().displaySmall.copy(fontFamily = pixelatedPusab),
+    headlineLarge = Typography().headlineLarge.copy(fontFamily = pixelatedPusab),
+    headlineMedium = Typography().headlineMedium.copy(fontFamily = pixelatedPusab),
+    headlineSmall = Typography().headlineSmall.copy(fontFamily = pixelatedPusab),
+    titleLarge = Typography().titleLarge.copy(fontFamily = pixelatedPusab),
+    titleMedium = Typography().titleMedium.copy(fontFamily = pixelatedPusab),
+    titleSmall = Typography().titleSmall.copy(fontFamily = pixelatedPusab),
+    bodyLarge = Typography().bodyLarge.copy(fontFamily = pixelatedPusab),
+    bodyMedium = Typography().bodyMedium.copy(fontFamily = pixelatedPusab),
+    bodySmall = Typography().bodySmall.copy(fontFamily = pixelatedPusab),
+    labelLarge = Typography().labelLarge.copy(fontFamily = pixelatedPusab),
+    labelMedium = Typography().labelMedium.copy(fontFamily = pixelatedPusab),
+    labelSmall = Typography().labelSmall.copy(fontFamily = pixelatedPusab)
 )
 
 @Preview
