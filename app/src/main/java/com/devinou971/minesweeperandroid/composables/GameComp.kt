@@ -63,7 +63,7 @@ fun GameComp(
     var navigateToHome by remember { mutableStateOf(false) }
     LaunchedEffect(navigateToHome) {
         if (navigateToHome)
-            navCtrl.navigate(Screen.DifficultyChooser)
+            navCtrl.popBackStack(Screen.DifficultyChooser, false)
     }
 
     fun replay() {
