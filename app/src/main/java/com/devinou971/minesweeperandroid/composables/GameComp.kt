@@ -1,5 +1,6 @@
 package com.devinou971.minesweeperandroid.composables
 
+import android.content.res.Configuration
 import android.graphics.Point
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
@@ -16,6 +17,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,6 +31,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -191,7 +194,8 @@ private fun GameOverDialog(
         Text(
             modifier = Modifier.align(Alignment.Center),
             text = stringResource(text),
-            fontSize = 50.sp
+            fontSize = 50.sp,
+            color = Color(0xFFE6E0E9)
         )
 
         @Composable
@@ -286,8 +290,9 @@ private fun PreviewGenerated() = MinesweeperAndroidTheme(true) {
 }
 
 @Preview(widthDp = width)
+@Preview(widthDp = width, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-private fun PreviewGO() = MinesweeperAndroidTheme(true) {
+private fun PreviewGO() = MinesweeperAndroidTheme {
     Surface {
         val game = generatePrevBoard()
             .apply {
@@ -309,8 +314,9 @@ private fun PreviewGO() = MinesweeperAndroidTheme(true) {
 }
 
 @Preview(widthDp = width)
+@Preview(widthDp = width, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
-private fun PreviewWin() = MinesweeperAndroidTheme(true) {
+private fun PreviewWin() = MinesweeperAndroidTheme {
     Surface {
         val game = generatePrevBoard()
             .apply {
