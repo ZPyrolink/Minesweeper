@@ -105,7 +105,7 @@ fun LevelBtn(
 
     LaunchedEffect(key1 = Unit) {
         val tmp: Duration = withContext(Dispatchers.IO) {
-            val data = AppDatabase.getAppDataBase(ctx).gameDataDAO()
+            val data = AppDatabase.getAppDataBase(ctx).gameDataDAO
                 .getBestTimeForDifficulty(difficulty.id) ?: return@withContext (-1).seconds
 
             data.time.seconds

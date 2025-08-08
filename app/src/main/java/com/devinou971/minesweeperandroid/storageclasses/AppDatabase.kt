@@ -5,14 +5,13 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-// This is the singleton that will be calling the database
 @Database(entities = [GameData::class], version = AppDatabase.VERSION)
 abstract class AppDatabase : RoomDatabase() {
-    abstract fun gameDataDAO(): GameDataDAO // This will have hte GameDataDao at the end
+    abstract val gameDataDAO: GameDataDAO
 
     companion object { // This companion has the singleton
-        public const val NAME: String = "MineSweeperDatabase"
-        public const val VERSION: Int = 1
+        const val NAME: String = "MineSweeperDatabase"
+        const val VERSION: Int = 1
 
         @Volatile
         private var instance: AppDatabase? = null

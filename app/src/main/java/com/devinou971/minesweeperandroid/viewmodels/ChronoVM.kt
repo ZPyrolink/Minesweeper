@@ -56,7 +56,7 @@ class ChronoVM : ViewModel() {
     ) {
         viewModelScope.launch(Dispatchers.IO) {
             AppDatabase.getAppDataBase(ctx)
-                .gameDataDAO()
+                .gameDataDAO
                 .insertGameData(
                     GameData(
                         id = null,
