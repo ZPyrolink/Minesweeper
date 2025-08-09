@@ -17,7 +17,6 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -43,6 +42,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.canopas.lib.showcase.IntroShowcaseScope
+import com.canopas.lib.showcase.component.ShowcaseStyle
 import com.devinou971.minesweeperandroid.R
 import com.devinou971.minesweeperandroid.Settings
 import com.devinou971.minesweeperandroid.navigation.Screen
@@ -59,7 +60,25 @@ fun GameComp(
     initialState: MinesweeperBoardState,
     navCtrl: NavController,
     cellSize: Int
+) = null.GameComp(initialState, navCtrl, cellSize)
+
+@Composable
+fun IntroShowcaseScope?.GameComp(
+    initialState: MinesweeperBoardState,
+    navCtrl: NavController,
+    cellSize: Int
 ) {
+    fun Modifier.iscTarget(
+        index: Int,
+        text: String,
+        style: ShowcaseStyle = ShowcaseStyle.Default,
+    ) = then(
+        if (this@GameComp != null)
+            Modifier.introShowCaseTarget(index, style) { Text(text) }
+        else
+            Modifier
+    )
+
     var board by remember { mutableStateOf(initialState) }
     val chrono = remember { ChronoVM() }
 
@@ -123,6 +142,10 @@ fun GameComp(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(
+                modifier = Modifier.iscTarget(
+                    0,
+                    "Vous avez autant de drapeaux que de bombes présente dans le jeu"
+                ),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
@@ -134,6 +157,10 @@ fun GameComp(
                 )
             }
             IconButton(
+                modifier = Modifier.iscTarget(
+                    1,
+                    "Vous pouvez relancer la partie à n'importe quel moment"
+                ),
                 onClick = ::replay
             ) {
                 Icon(
@@ -147,14 +174,25 @@ fun GameComp(
             })
 
             SlotComp.ImageOnTile(
-                40,
-                Settings.theme[board.mode.icon],
+                modifier = Modifier.iscTarget(
+                    2,
+                    "Vous pouvez alterner entre détruire et protéger les cases"
+                ),
+                cellSize = 40,
+                icon = Settings.theme[board.mode.icon],
                 desc = board.mode.name,
                 onClick = board::changeMode
             )
         }
 
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .iscTarget(
+                    3,
+                    "Maintenant, à vous de jouer !"
+                )
+        ) {
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(cellSize.dp)
             ) {

@@ -8,7 +8,6 @@ import androidx.room.Query
 
 @Dao
 interface GameDataDAO {
-
     @Insert
     fun insertGameData(gameData: GameData)
 
@@ -23,4 +22,7 @@ interface GameDataDAO {
 
     @Query("SELECT * FROM GameData WHERE game_type=:difficulty ORDER BY time ASC LIMIT 1")
     fun getBestTimeForDifficulty(difficulty: Int) : GameData?
+
+    @get:Query("SELECT NOT EXISTS(select 1 from GameData LIMIT 1)")
+    val isFirstGame: Boolean
 }

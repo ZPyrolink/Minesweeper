@@ -3,12 +3,15 @@ package com.devinou971.minesweeperandroid.navigation
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.createGraph
 import androidx.navigation.toRoute
+import com.canopas.lib.showcase.IntroShowcase
+import com.canopas.lib.showcase.IntroShowcaseScope
 import com.devinou971.minesweeperandroid.composables.CustomGameComp
 import com.devinou971.minesweeperandroid.composables.GameComp
 import com.devinou971.minesweeperandroid.composables.MainComp
@@ -16,9 +19,12 @@ import com.devinou971.minesweeperandroid.composables.MenuComp
 import com.devinou971.minesweeperandroid.composables.ParametersComp
 import com.devinou971.minesweeperandroid.serializer.SerializableIntSize
 import com.devinou971.minesweeperandroid.states.MinesweeperBoardState
+import com.devinou971.minesweeperandroid.storageclasses.AppDatabase.Companion.appDatabase
 import com.devinou971.minesweeperandroid.ui.theme.slotColorScheme
 import com.devinou971.minesweeperandroid.utils.Difficulty
 import com.devinou971.minesweeperandroid.viewmodels.SettingsVM
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import kotlin.reflect.typeOf
 
@@ -66,7 +72,10 @@ sealed interface Screen {
                     )
                 ) {
                     val route = it.toRoute<Game>()
-                    GameComp(
+                    val ctx = LocalContext.current
+
+                    @Composable
+                    fun IntroShowcaseScope?.Game() = GameComp(
                         MinesweeperBoardState(
                             route.size,
                             route.nbBombs,
@@ -75,6 +84,12 @@ sealed interface Screen {
                         ctrl,
                         route.cellSize
                     )
+
+                    if (runBlocking(Dispatchers.IO) { ctx.appDatabase.gameDataDAO.isFirstGame }) {
+                        IntroShowcase(true, {}) {
+                            Game()
+                        }
+                    } else null.Game()
                 }
                 composable<Parameters> {
                     val dc = MaterialTheme.slotColorScheme.content

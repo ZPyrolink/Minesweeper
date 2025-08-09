@@ -115,12 +115,13 @@ sealed interface SlotComp<T : SlotState> {
 
         @Composable
         fun ImageOnTile(
+            modifier: Modifier = Modifier,
             cellSize: Int,
             @DrawableRes icon: Int,
             desc: String,
             onClick: (() -> Unit)? = null
         ) = Box(
-            modifier = Modifier
+            modifier = modifier
                 .size(cellSize.dp)
                 .clickable(onClick = { onClick?.invoke() }),
         ) {
