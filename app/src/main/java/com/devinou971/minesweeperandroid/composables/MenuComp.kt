@@ -27,6 +27,7 @@ import com.devinou971.minesweeperandroid.R
 import com.devinou971.minesweeperandroid.navigation.Screen
 import com.devinou971.minesweeperandroid.serializer.SerializableIntSize
 import com.devinou971.minesweeperandroid.storageclasses.AppDatabase
+import com.devinou971.minesweeperandroid.storageclasses.AppDatabase.Companion.appDatabase
 import com.devinou971.minesweeperandroid.ui.theme.MinesweeperAndroidTheme
 import com.devinou971.minesweeperandroid.utils.Difficulty
 import com.devinou971.minesweeperandroid.utils.LocalDpSize
@@ -105,7 +106,7 @@ fun LevelBtn(
 
     LaunchedEffect(key1 = Unit) {
         val tmp: Duration = withContext(Dispatchers.IO) {
-            val data = AppDatabase.getAppDataBase(ctx).gameDataDAO
+            val data = ctx.appDatabase.gameDataDAO
                 .getBestTimeForDifficulty(difficulty.id) ?: return@withContext (-1).seconds
 
             data.time.seconds

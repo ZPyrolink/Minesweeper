@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import com.devinou971.minesweeperandroid.Settings
 import com.devinou971.minesweeperandroid.storageclasses.AppDatabase
+import com.devinou971.minesweeperandroid.storageclasses.AppDatabase.Companion.appDatabase
 
 private const val TAG = "SettingsVM"
 
@@ -46,7 +47,7 @@ class SettingsVM(
     }
 
     fun clearData(ctx: Context) {
-        AppDatabase.getAppDataBase(ctx).clearAllTables()
+        ctx.appDatabase.clearAllTables()
     }
 
     override fun toString(): String {

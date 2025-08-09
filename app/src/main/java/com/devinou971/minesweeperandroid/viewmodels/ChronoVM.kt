@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.devinou971.minesweeperandroid.storageclasses.AppDatabase
+import com.devinou971.minesweeperandroid.storageclasses.AppDatabase.Companion.appDatabase
 import com.devinou971.minesweeperandroid.storageclasses.GameData
 import com.devinou971.minesweeperandroid.utils.Difficulty
 import kotlinx.coroutines.Dispatchers
@@ -55,7 +56,7 @@ class ChronoVM : ViewModel() {
         difficulty: Difficulty
     ) {
         viewModelScope.launch(Dispatchers.IO) {
-            AppDatabase.getAppDataBase(ctx)
+            ctx.appDatabase
                 .gameDataDAO
                 .insertGameData(
                     GameData(
