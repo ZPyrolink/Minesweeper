@@ -8,9 +8,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.devinou971.minesweeperandroid.Settings
 import com.devinou971.minesweeperandroid.storageclasses.AppDatabase
 import com.devinou971.minesweeperandroid.storageclasses.AppDatabase.Companion.appDatabase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 private const val TAG = "SettingsVM"
 
@@ -47,7 +50,7 @@ class SettingsVM(
     }
 
     fun clearData(ctx: Context) {
-        ctx.appDatabase.clearAllTables()
+        viewModelScope.launch(Dispatchers.IO) { ctx.appDatabase.clearAllTables() }
     }
 
     override fun toString(): String {
